@@ -9,6 +9,7 @@ from .control_plane import (
 )
 from .evidence import EvidenceLedger
 from .gateway import AdmissionResult, admit_action
+from .knowledge import KnowledgeDocument, KnowledgeHit, KnowledgeSource, KnowledgeState, PersonalKnowledgeStore
 
 __all__ = [
     "AuthorityContract", "AuthorityDecision", "TaskRequest", "evaluate_authority",
@@ -17,4 +18,5 @@ __all__ = [
     "ControlPlaneResult", "HumanApproval", "OwnerIdentity",
     "RepresentativeControlPlane", "RepresentativeRecord", "RepresentativeSpec",
     "RepresentativeState", "EvidenceLedger", "AdmissionResult", "admit_action",
+    "KnowledgeDocument", "KnowledgeHit", "KnowledgeSource", "KnowledgeState", "PersonalKnowledgeStore",
 ]
