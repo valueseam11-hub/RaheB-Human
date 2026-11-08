@@ -218,3 +218,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# RaheB Human local tooling
+.ruff_cache/
+.mypy_cache/
+.env.*
+!.env.example
