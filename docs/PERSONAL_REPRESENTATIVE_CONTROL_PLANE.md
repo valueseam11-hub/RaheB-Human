@@ -25,6 +25,10 @@ CONFIGURED → ACTIVE ↔ PAUSED → REVOKED
 8. Re-evaluate authority and append evidence.
 9. Return an admission decision. This module does not execute the side effect.
 
+## Authority content binding
+
+Activation stores a canonical SHA-256 digest of the complete authority contract, including owner/representative IDs, allowed tasks, tools, data scopes, expiry, revocation and approval requirements. Every later admission recomputes and compares this digest. A contract with the same ID and version but broader permissions is rejected. This detects content substitution within this reference model; it is not a digital signature or a replacement for trusted contract storage.
+
 ## Approval binding and replay resistance
 
 An approval is not a general “yes”. It is bound to a canonical digest of task type, tool, data scopes and impact flags. It also binds owner, representative version, authority contract ID/version and expiry. Successful admission consumes the approval once. Pause or revocation invalidates outstanding approvals.
