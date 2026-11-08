@@ -56,6 +56,7 @@ class RepresentativeRecord:
     state: RepresentativeState
     authority_contract_id: str | None = None
     authority_contract_version: int | None = None
+    authority_contract_digest: str | None = None
 
 
 @dataclass(frozen=True)
@@ -75,6 +76,25 @@ class ControlPlaneResult:
     decision: AuthorityDecision
     side_effect_permitted: bool
     reason: str
+
+
+def _authority_digest(contract: AuthorityContract) -> str:
+    """Bind authority by canonical content, not merely a caller-supplied ID/version."""
+    body = {
+        "contract_id": contract.contract_id,
+        "owner_id": contract.owner_id,
+        "representative_id": contract.representative_id,
+        "version": contract.version,
+        "allowed_tasks": sorted(contract.allowed_tasks),
+        "allowed_tools": sorted(contract.allowed_tools),
+        "data_scopes": sorted(contract.data_scopes),
+        "expires_at": contract.expires_at.isoformat(),
+        "revoked": contract.revoked,
+        "require_approval_for_high_impact": contract.require_approval_for_high_impact,
+        "require_approval_for_irreversible": contract.require_approval_for_irreversible,
+    }
+    encoded = json.dumps(body, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
 def _task_digest(request: TaskRequest) -> str:
@@ -113,6 +133,8 @@ class RepresentativeControlPlane:
     def register(self, owner: OwnerIdentity, representative_id: str,
                  spec: RepresentativeSpec) -> RepresentativeRecord:
         with self._lock:
+            if not owner.owner_id.strip():
+                raise ValueError("owner_id is required")
             if not owner.verified:
                 raise PermissionError("verified owner identity is required")
             if not representative_id or representative_id in self._representatives:
@@ -148,7 +170,8 @@ class RepresentativeControlPlane:
             updated = replace(record, version=record.version + 1,
                               state=RepresentativeState.ACTIVE,
                               authority_contract_id=contract.contract_id,
-                              authority_contract_version=contract.version)
+                              authority_contract_version=contract.version,
+                              authority_contract_digest=_authority_digest(contract))
             self._representatives[representative_id] = updated
             self._stop_switch[representative_id] = False
             self.evidence.append("REPRESENTATIVE_ACTIVATED", representative_id, {
@@ -337,5 +360,6 @@ class RepresentativeControlPlane:
             or contract.contract_id != record.authority_contract_id
             or contract.version != record.authority_contract_version
             or contract.revoked
+            or _authority_digest(contract) != record.authority_contract_digest
         ):
             raise PermissionError("authority contract does not match active representative binding")
