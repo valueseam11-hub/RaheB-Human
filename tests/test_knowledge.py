@@ -9,15 +9,15 @@ from raheb_human.core.knowledge import (
 NOW = datetime(2030, 1, 1, tzinfo=timezone.utc)
 
 
-def grants(*, memory=True, service=True):
+def grants(owner_id="owner-a", *, memory=True, service=True):
     items = []
     if service:
         items.append(ConsentGrant(
-            "owner-a", ConsentPurpose.SERVICE_PROCESSING, True, "service-v1", NOW
+            owner_id, ConsentPurpose.SERVICE_PROCESSING, True, "service-v1", NOW
         ))
     if memory:
         items.append(ConsentGrant(
-            "owner-a", ConsentPurpose.PERSISTENT_MEMORY, True, "memory-v1", NOW
+            owner_id, ConsentPurpose.PERSISTENT_MEMORY, True, "memory-v1", NOW
         ))
     return tuple(items)
 
@@ -61,7 +61,7 @@ class PersonalKnowledgeStoreTests(unittest.TestCase):
         )
         foreign = self.store.retrieve(
             "owner-b", "reconciliation invoices", frozenset({"owner:finance"}),
-            (), now=NOW,
+            grants("owner-b"), now=NOW,
         )
         wrong_scope = self.store.retrieve(
             "owner-a", "reconciliation", frozenset({"employer:restricted"}),
