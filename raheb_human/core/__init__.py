@@ -1,8 +1,12 @@
-"""Core authority, consent, capability and evidence primitives."""
+"""Core authority, consent, capability, evidence and control-plane primitives."""
 
 from .authority import AuthorityContract, AuthorityDecision, TaskRequest, evaluate_authority
 from .capability import CapabilityAssessment, CapabilityStatus, HumanCredential
 from .consent import ConsentGrant, ConsentPurpose, consent_allows
+from .control_plane import (
+    ControlPlaneResult, HumanApproval, OwnerIdentity, RepresentativeControlPlane,
+    RepresentativeRecord, RepresentativeSpec, RepresentativeState,
+)
 from .evidence import EvidenceLedger
 from .gateway import AdmissionResult, admit_action
 
@@ -10,5 +14,7 @@ __all__ = [
     "AuthorityContract", "AuthorityDecision", "TaskRequest", "evaluate_authority",
     "CapabilityAssessment", "CapabilityStatus", "HumanCredential",
     "ConsentGrant", "ConsentPurpose", "consent_allows",
-    "EvidenceLedger", "AdmissionResult", "admit_action",
+    "ControlPlaneResult", "HumanApproval", "OwnerIdentity",
+    "RepresentativeControlPlane", "RepresentativeRecord", "RepresentativeSpec",
+    "RepresentativeState", "EvidenceLedger", "AdmissionResult", "admit_action",
 ]

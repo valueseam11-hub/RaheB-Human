@@ -4,16 +4,23 @@
 
 RaheB Human is building human-owned professional AI representatives. A representative can prepare, analyse, research and assist under a human owner's identity, approved knowledge, explicit authority and continuing oversight. It must disclose that it is AI and must never imply that the human personally performed work they did not perform.
 
-## Foundation v0.1
+## Architecture foundation v0.1
 
-This first architecture foundation establishes a small, dependency-free Python control core:
+The dependency-free Python core establishes distinct owner and representative identities, versioned authority contracts, purpose-specific consent, scoped AI capability evidence, a fail-closed admission gateway and a hash-linked evidence ledger.
 
-- **Identity boundary:** owner identity, representative identity and AI capability are distinct.
-- **Authority contract:** every proposed tool action is checked against a versioned, time-bounded, revocable delegation.
-- **Consent ledger:** consent is granular by purpose; optional purposes do not inherit from service consent.
-- **Capability evidence:** human qualifications do not automatically become AI capabilities; capability claims require scoped test evidence.
-- **Fail-closed gateway:** missing, expired, revoked or insufficient authority produces HOLD/DENY and no side effect.
-- **Evidence chain:** append-only hash-linked records support tamper-evidence. Hash integrity does not prove truth, correctness or current authorization.
+## Personal Representative Control Plane v0.1
+
+HRCP coordinates the representative lifecycle:
+
+- Register a representative against a verified owner identity and approved knowledge references.
+- Require visible AI disclosure.
+- Activate only with current service-processing consent and a matching, current authority contract.
+- Pause or revoke the representative, cancel registered pending work and invalidate outstanding approvals.
+- Require scoped capability evidence, current consent and a matching representative version before admission.
+- Bind high-impact approvals to the exact task digest, owner, representative version, authority version and expiry; consume each approval once.
+- Record lifecycle and admission evidence.
+
+A successful admission is **not execution**. The reference implementation always returns `side_effect_permitted=False`; no external tool is invoked.
 
 ## Quick start
 
@@ -23,6 +30,9 @@ Requires Python 3.11+; no third-party runtime dependencies.
 
 ## Current scope and limitations
 
-This is an architecture foundation, not a production agent platform. It does not yet provide authentication, persistent database storage, cryptographic signatures, key management, multi-tenant isolation, model orchestration, integrations, legal consent documents or a deployed service. The in-memory ledger is a testable reference implementation only. Do not use it to authorize real-world actions.
+This is a testable architecture reference, not a production agent platform. HRCP is in-memory and process-local. It does not provide authentication, durable state, distributed revocation, secure timestamps, cryptographic signatures, tenant isolation, a model runtime, an API, or external tool execution. Caller-supplied owner IDs are not authentication. Do not use this implementation with live customer data or to authorize real-world side effects.
 
-See docs/ARCHITECTURE_FOUNDATION.md and docs/THREAT_MODEL.md.
+See:
+- docs/ARCHITECTURE_FOUNDATION.md
+- docs/THREAT_MODEL.md
+- docs/PERSONAL_REPRESENTATIVE_CONTROL_PLANE.md
