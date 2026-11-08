@@ -36,3 +36,10 @@ See:
 - docs/ARCHITECTURE_FOUNDATION.md
 - docs/THREAT_MODEL.md
 - docs/PERSONAL_REPRESENTATIVE_CONTROL_PLANE.md
+
+
+## Personal Intelligence & Knowledge Engine v0.1
+
+The owner-scoped knowledge reference store adds source metadata, per-source versioning, content digests, explicit owner approval, withdrawal and scope-filtered lexical retrieval. Submission and retrieval require both service-processing consent and separate persistent-memory consent. New source versions remain pending until approved. Retrieval returns source citations and treats content as untrusted input.
+
+The reference implementation is in-memory and accepts caller-provided text only. It does not parse uploads, scan malware, authenticate owners, persist data, encrypt content or provide production tenant isolation. It must not be used with live customer, employer or client data.
