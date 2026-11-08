@@ -97,6 +97,29 @@ class ControlPlaneAdmissionTests(unittest.TestCase):
         )
         self.assertEqual(stale.decision, AuthorityDecision.HOLD)
 
+    def test_same_contract_id_and_version_cannot_expand_permissions(self):
+        from dataclasses import replace
+
+        expanded_contract = replace(
+            self.contract,
+            allowed_tasks=frozenset({"prepare_report", "approve_payment", "send_wire"}),
+            allowed_tools=frozenset({"document_reader", "payment_gateway", "bank_api"}),
+            data_scopes=frozenset({"owner-approved:finance", "client:restricted"}),
+        )
+        escalated_request = TaskRequest(
+            "send_wire", "bank_api", frozenset({"client:restricted"})
+        )
+        result = self.plane.admit(
+            "owner-1", "rep-1", escalated_request, expanded_contract,
+            self.capability, self.consent,
+            required_capability="prepare_report",
+            required_scope="synthetic-finance-data",
+            expected_representative_version=self.active.version,
+            now=NOW,
+        )
+        self.assertEqual(result.decision, AuthorityDecision.DENY)
+        self.assertFalse(result.side_effect_permitted)
+
     def test_valid_task_admitted_but_not_executed(self):
         result = self.plane.admit(
             "owner-1", "rep-1", self.request, self.contract, self.capability, self.consent,
