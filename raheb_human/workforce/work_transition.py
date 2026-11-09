@@ -39,7 +39,7 @@ class WorkloadShift:
             if q is not None and not 0 <= q <= 1: raise ValueError("quality scores must be between 0 and 1")
     @property
     def total_assisted_human_minutes(self) -> int:
-        return self.ai_assisted_human_minutes+self.review_minutes+self.correction_minutes+self.exception_minutes+self.coordination_minutes
+        return self.ai_assisted_human_minutes+self.review_minutes+self.correction_minutes+self.exception_minutes+self.coordination_minutes+self.training_minutes
     @property
     def net_human_minutes_saved(self) -> int:
         return self.baseline_human_minutes-self.total_assisted_human_minutes
