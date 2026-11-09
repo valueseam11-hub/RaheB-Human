@@ -1,0 +1,14 @@
+services:
+  raheb-human:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      RAHEB_DB_PATH: /app/var/raheb.sqlite3
+      RAHEB_SESSION_PEPPER: \${RAHEB_SESSION_PEPPER:-development-only-change-before-deployment}
+      RAHEB_COOKIE_SECURE: \${RAHEB_COOKIE_SECURE:-0}
+    volumes:
+      - raheb_data:/app/var
+    restart: unless-stopped
+volumes:
+  raheb_data:
