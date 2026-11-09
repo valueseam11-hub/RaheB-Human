@@ -55,3 +55,21 @@ The public website is served by the FastAPI application. The interactive workspa
 The workspace opens a short-lived, synthetic-only guest session. It supports a persisted representative draft, fixed synthetic knowledge fixtures, owner approval, deterministic task drafts, human review/rejection and a hash-linked evidence trail. It does not call an AI model or execute external actions.
 
 Public account registration and personal/employer/client knowledge ingestion are deliberately disabled until approved legal documents, purpose-specific consent controls and production security safeguards are completed. See `docs/WEB_APPLICATION_API_V0.1.md`.
+
+
+## Workforce Intelligence & Trust Foundation v0.1
+
+The workforce module adds a conservative task assessment and evidence-first supervised workbench:
+
+- Classifies routine, research, judgment, high-impact, human-interaction and unknown tasks.
+- Uses SUPERVISED_EXECUTION, PREPARE_ONLY, HUMAN_OWNED or HOLD; missing approved data scope forces HOLD.
+- Requires scoped evidence references before draft preparation; drafts never execute or send work.
+- Provides exact task/output/owner/representative/authority approval-binding validation with expiry and nonce checks. Durable atomic nonce consumption is not implemented.
+- Separates employee-owned personal scopes from employer-controlled system scopes.
+- Calculates net time saved after AI preparation, human review and rework; negative savings remain visible.
+
+Run the new policy tests with:
+
+    python -m unittest discover -s tests -p 'test_work_intelligence.py' -v
+
+This is deterministic policy scaffolding, not a validated occupational risk model or production authorization service. The module is not yet integrated with the web API, persistent task storage, model runtime or workplace connectors. Continue using synthetic demo data only. See `docs/WORKFORCE_INTELLIGENCE_AND_TRUST_V0.1.md`.
