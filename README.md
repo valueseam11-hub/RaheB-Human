@@ -125,3 +125,12 @@ The panel also provides questions to ask employers about AI-use rules, assessmen
 
 ### Human Capability Continuity
 The workspace includes a synthetic, browser-local workflow review calculator that counts review, correction, exception handling, coordination and training alongside AI-assisted preparation. It flags zero or negative net human time savings for review. It is a workflow discussion aid—not an employee score, job-loss predictor or layoff recommendation. Inputs are not sent or saved. See [the workforce trust and transition safeguards](docs/WORKFORCE_INTELLIGENCE_AND_TRUST_V0.1.md).
+
+
+## Human-in-the-Loop Visual Attestation v0.1
+
+Visual Attestation adds evidence-first human review for AI interpretations of visual/physical-world evidence. High/critical/unknown-risk cases require human review regardless of model confidence; missing evidence or reviewer capacity fails closed to HOLD. Human verdicts bind to exact evidence and model-output digests, preserve uncertainty and disagreement, and prevent unauthorised intervention. Corrections are pending validation and are not automatically treated as training truth.
+
+Core policy module: raheb_human/core/visual_attestation.py. Tests: python -m unittest discover -s tests -p 'test_visual_attestation.py' -v.
+
+This is a tested-policy target, not a production visual inspection system. Media ingestion/storage, reviewer authentication, durable API, calibrated uncertainty, operational stop integration and validated training pipelines are not implemented. Synthetic evidence only. See docs/VISUAL_ATTESTATION_V0.1.md.
