@@ -84,3 +84,26 @@ Implemented: transparent task classification; fail-closed delegation; evidence-s
 Not yet implemented: persistent workflow/task store or API integration; production identity, consent, employer tenancy or connector authorization; model runtime, file ingestion, skills assessment or learning analytics; durable atomic nonce consumption, signed evidence, independent audit anchoring; validated industry-specific risk taxonomy or legal review.
 
 The existing synthetic demo remains the only supported end-user demonstration. Do not process real employee, employer, client or personal data with these primitives. Do not describe this as production-ready or independently certified.
+
+## Work redistribution and capability development
+AI productivity must be evaluated as a change to the whole workflow, not merely as automated task count. Human effort can move into review, correction, exception handling, coordination, prompting, training and professional judgment. These are real work and must be measured.
+
+The `WorkloadShift` record captures baseline human time and AI-assisted preparation, review, correction, exception and coordination time. It retains negative net savings, unresolved exceptions and quality changes. A workflow is flagged for review when net savings are zero or negative, unresolved exceptions remain, or measured quality declines. It does not infer employee performance or replaceability.
+
+### Learning while work is automated
+The learning primitives support explanation, guided practice, shadow review and human performance checks. AI may explain and coach, but it cannot attest to a learner's competence. Skill evidence must identify the learner, assessor, assessment method, evidence reference, outcome and time. Outcomes are limited to DEMONSTRATED, DEVELOPING, NOT_DEMONSTRATED and INCONCLUSIVE.
+
+This addresses a key risk: if AI takes over routine preparation, junior staff may lose the repetitions and feedback through which professional judgment develops. Workflow design should preserve safe practice, supervised responsibility and progression toward more complex work.
+
+### Compensation and labor-market realism
+RaheB can make human contributions and workflow outcomes more visible, but it cannot guarantee wage increases, bargaining power, job retention or equitable distribution of productivity gains. AI may expand competition and change the price of professional services even when occupations remain. These economic outcomes depend on employer decisions, labor markets, institutions and policy beyond the product's control.
+
+RaheB must not claim that a personal AI protects a user's job or salary. It should provide evidence that can support transparent conversations about workload, quality, responsibility, skill development and value creation, subject to lawful access and the user's control over disclosure.
+
+### Workforce-level reporting guardrails
+- Measure the whole workflow, including hidden review and correction work.
+- Separate workflow-level aggregates from individual employee records.
+- Do not score replaceability, rank employees or infer layoffs from AI usage.
+- Do not use AI-generated output volume as a proxy for productivity.
+- Preserve negative savings, quality regressions and unresolved exceptions.
+- Do not present AI-completed tasks as proof of human skill.
