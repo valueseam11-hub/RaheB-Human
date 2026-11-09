@@ -70,6 +70,6 @@ The workforce module adds a conservative task assessment and evidence-first supe
 
 Run the new policy tests with:
 
-    python -m unittest tests.test_work_intelligence -v
+    python -m unittest discover -s tests -p 'test_work_intelligence.py' -v
 
 This is deterministic policy scaffolding, not a validated occupational risk model or production authorization service. The module is not yet integrated with the web API, persistent task storage, model runtime or workplace connectors. Continue using synthetic demo data only. See `docs/WORKFORCE_INTELLIGENCE_AND_TRUST_V0.1.md`.
