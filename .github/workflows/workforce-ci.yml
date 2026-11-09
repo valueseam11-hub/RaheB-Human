@@ -1,0 +1,25 @@
+name: Workforce Intelligence CI
+on:
+  pull_request:
+    paths:
+      - 'raheb_human/workforce/**'
+      - 'tests/test_work_intelligence.py'
+      - '.github/workflows/workforce-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'raheb_human/workforce/**'
+      - 'tests/test_work_intelligence.py'
+      - '.github/workflows/workforce-ci.yml'
+permissions:
+  contents: read
+jobs:
+  workforce-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run workforce policy tests
+        run: python -m unittest discover -s tests -p 'test_work_intelligence.py' -v
