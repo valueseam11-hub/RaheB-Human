@@ -16,8 +16,8 @@ startDemo();
 const careerFields=["career-current","career-target","career-story","career-requirements","career-evidence"];
 function careerMap(){
  const current=$(careerFields[0]).value.trim(),target=$(careerFields[1]).value.trim(),story=$(careerFields[2]).value.trim();
- const requirements=$(careerFields[3]).value.split("\\n").map(x=>x.trim()).filter(Boolean);
- const evidence=$(careerFields[4]).value.split("\\n").map(x=>x.trim()).filter(Boolean);
+ const requirements=$(careerFields[3]).value.split(String.fromCharCode(10)).map(x=>x.trim()).filter(Boolean);
+ const evidence=$(careerFields[4]).value.split(String.fromCharCode(10)).map(x=>x.trim()).filter(Boolean);
  const out=$("career-output");
  if(!current&&!target&&!story&&!requirements.length&&!evidence.length){out.innerHTML='<p class="error">Add at least one career detail or requirement to build a map.</p>';return;}
  const rows=requirements.map((req,i)=>({req,evidence:evidence[i]||""}));
