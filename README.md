@@ -55,3 +55,8 @@ The public website is served by the FastAPI application. The interactive workspa
 The workspace opens a short-lived, synthetic-only guest session. It supports a persisted representative draft, fixed synthetic knowledge fixtures, owner approval, deterministic task drafts, human review/rejection and a hash-linked evidence trail. It does not call an AI model or execute external actions.
 
 Public account registration and personal/employer/client knowledge ingestion are deliberately disabled until approved legal documents, purpose-specific consent controls and production security safeguards are completed. See `docs/WEB_APPLICATION_API_V0.1.md`.
+
+
+## Production trust foundation (in progress)
+
+The `production/authority-consent-foundation-v0.1` branch adds a PostgreSQL schema with row-level tenant isolation, a transaction-local tenant context adapter, append-only evidence events, and optional PostgreSQL integration tests. The current public FastAPI demo still uses SQLite; this storage layer is not yet wired into live routes. See `docs/PRODUCTION_TRUST_FOUNDATION_V0.1.md`. Do not use live personal or employer/client data yet.
