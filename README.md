@@ -76,3 +76,16 @@ This is deterministic policy scaffolding, not a validated occupational risk mode
 
 ### Work redistribution and professional growth
 The workforce layer also measures where human effort moves after AI is introduced: review, correction, exceptions and coordination are counted alongside AI-assisted preparation. It preserves negative time savings and quality regressions. Learning primitives support explanation, guided practice and human performance checks; AI cannot attest to a person's competence. The platform explicitly excludes employee replaceability scoring and employment decisions. See the workforce trust document for limitations and data boundaries.
+
+
+## Work Identity & Recognition Intelligence v0.1
+
+The new owner-controlled work identity layer records the difference between formal role expectations and actual work performed as AI changes workflows. It captures observation periods, frequency, AI assistance, retained human responsibility, evidence status and optional baseline/observed outcome measures. It prepares neutral recognition summaries for discussion about role scope, workload, skills, business outcomes, compensation review or title/level review.
+
+Evidence levels remain distinct (self-reported, documented, corroborated, disputed and not verified). Potential role-scope gaps are review prompts, not proof of contractual change. No pay, promotion, job-security or legal outcome is predicted. Disclosure requires explicit owner approval and selected entries. No employee monitoring, ranking or replaceability scoring is supported.
+
+Run its tests with:
+
+    python -m unittest discover -s tests -p 'test_work_identity.py' -v
+
+This v0.1 layer is in-memory scaffolding only; it is not connected to persistent storage, the web API, employer systems or compensation benchmarking. Use synthetic data only. See `docs/WORK_IDENTITY_AND_RECOGNITION_V0.1.md`.
