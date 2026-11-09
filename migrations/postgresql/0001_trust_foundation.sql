@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS raheb_capability_assessments (
  status TEXT NOT NULL CHECK(status IN ('NOT_ASSESSED','TESTED','FAILED','EXPIRED')),
  test_suite_version TEXT NOT NULL, evidence_digest BYTEA NOT NULL CHECK(octet_length(evidence_digest)=32),
  assessed_at TIMESTAMPTZ NOT NULL, expires_at TIMESTAMPTZ,
- FOREIGN KEY(owner_id,representative_id) REFERENCES raheb_representatives(owner_id,representative_id)
+ FOREIGN KEY(owner_id,representative_id) REFERENCES raheb_representatives(owner_id,representative_id),
+ UNIQUE(owner_id,assessment_id)
 );
 CREATE TABLE IF NOT EXISTS raheb_knowledge_documents (
  document_id UUID PRIMARY KEY, owner_id UUID NOT NULL REFERENCES raheb_owner_accounts(owner_id),
@@ -59,16 +60,18 @@ CREATE TABLE IF NOT EXISTS raheb_tasks (
  authority_contract_id UUID, authority_contract_version INTEGER, capability_assessment_id UUID,
  created_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
  FOREIGN KEY(owner_id,representative_id) REFERENCES raheb_representatives(owner_id,representative_id),
+ UNIQUE(owner_id,task_id),
  FOREIGN KEY(owner_id,authority_contract_id) REFERENCES raheb_authority_contracts(owner_id,contract_id),
- FOREIGN KEY(capability_assessment_id) REFERENCES raheb_capability_assessments(assessment_id)
+ FOREIGN KEY(owner_id,capability_assessment_id) REFERENCES raheb_capability_assessments(owner_id,assessment_id)
 );
 CREATE TABLE IF NOT EXISTS raheb_human_approvals (
  approval_id UUID PRIMARY KEY, owner_id UUID NOT NULL REFERENCES raheb_owner_accounts(owner_id),
- task_id UUID NOT NULL REFERENCES raheb_tasks(task_id), contract_id UUID NOT NULL,
+ task_id UUID NOT NULL, contract_id UUID NOT NULL,
  contract_version INTEGER NOT NULL, request_digest BYTEA NOT NULL CHECK(octet_length(request_digest)=32),
  decision TEXT NOT NULL CHECK(decision IN ('APPROVED','REJECTED')), approved_by UUID NOT NULL,
  approved_at TIMESTAMPTZ NOT NULL, expires_at TIMESTAMPTZ NOT NULL CHECK(expires_at>approved_at),
- consumed_at TIMESTAMPTZ, FOREIGN KEY(owner_id,contract_id) REFERENCES raheb_authority_contracts(owner_id,contract_id)
+ consumed_at TIMESTAMPTZ, FOREIGN KEY(owner_id,task_id) REFERENCES raheb_tasks(owner_id,task_id),
+ FOREIGN KEY(owner_id,contract_id) REFERENCES raheb_authority_contracts(owner_id,contract_id)
 );
 CREATE TABLE IF NOT EXISTS raheb_evidence_events (
  sequence BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, event_id UUID NOT NULL UNIQUE,
