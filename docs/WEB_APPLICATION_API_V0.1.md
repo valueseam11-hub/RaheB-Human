@@ -34,3 +34,11 @@ Set a strong RAHEB_SESSION_PEPPER and RAHEB_COOKIE_SECURE=1 behind HTTPS before 
 This is an application foundation, not a production service. Before public accounts or personal data: approved legal documents; email verification/password reset; MFA/passkeys; robust rate limiting; CSRF/origin policy review; secret management; secure cookie configuration; encrypted PostgreSQL with tenant RLS; backup/restore; retention/deletion; signed audit anchoring; CSP/security headers; pinned dependencies and vulnerability scanning; monitoring/incident response; upload quarantine/malware scanning; privacy workflows and independent threat-model review.
 
 SQLite is not encrypted at rest. Hash chaining is not a digital signature, independent witness or proof of truth. The API does not call an LLM, execute tools or perform real-world actions.
+
+## Career Intelligence Lab preview
+
+The workspace at `/app` includes a fourth, browser-local Career Intelligence Lab. It accepts a current role, an owner-defined career direction, a professional narrative, role requirements and candidate-entered evidence. It pairs requirement and evidence lines by position to create a working map. Unmatched requirements are labelled `NOT YET EVIDENCED`, not as missing ability. It generates no candidate score, hiring prediction or claim of verification.
+
+The panel provides a checklist of questions for employers about AI-use rules, assessment methods, human review, candidate-data handling and accommodations. Career-panel fields are handled in the browser only; they are not submitted to FastAPI, stored in SQLite, or disclosed to employers. The existing synthetic representative demo remains separate and uses only server-side synthetic fixtures.
+
+This is a UI prototype, not live job search, role matching, résumé generation, verified evidence storage or application submission. Users should not enter sensitive personal, employer or client data. Before turning this into an authenticated persistent career profile, implement purpose-specific consent, owner export/correction/deletion, tenant isolation, retention controls, security review and evidence provenance.

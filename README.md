@@ -115,3 +115,9 @@ Run its tests with:
     python -m unittest discover -s tests -p 'test_transition_support.py' -v
 
 In-memory scaffolding only; no counselling, sentiment analysis, persistent storage, API, employer dashboard or emergency-support integration. Not production-ready. See `docs/HUMAN_TRANSITION_AND_RESILIENCE_SUPPORT_V0.1.md`.
+
+## Career Intelligence Workspace v0.1
+
+The synthetic workspace at `/app` now includes a local-only career evidence mapper. A person can enter a current role, a career direction, their own professional narrative, sourced role requirements and evidence they can substantiate. The browser pairs requirements and evidence by their displayed order and labels unmatched requirements `NOT YET EVIDENCED`; it does not infer a skills deficit or generate a candidate score.
+
+The panel also provides questions to ask employers about AI-use rules, assessment methods, human review, candidate data and accommodations. Inputs in this career panel are processed only in the browser: they are not posted to the API, persisted, or shared with employers. This is an interaction prototype, not a live job-search engine, résumé generator, verified portfolio, or hiring predictor. Do not enter sensitive personal, employer or client information in the synthetic preview.
