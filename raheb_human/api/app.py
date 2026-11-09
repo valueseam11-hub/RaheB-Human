@@ -23,12 +23,38 @@ SESSION_PEPPER=os.environ.get("RAHEB_SESSION_PEPPER","development-only-change-be
 PRODUCTION_CONFIGURED=SESSION_PEPPER!="development-only-change-before-deployment"
 app=FastAPI(title="RaheB Human API",version="0.1.0",description="Human-owned professional representative application API. No external agent actions are enabled.",docs_url="/api/docs",redoc_url=None)
 
+@app.middleware("http")
+async def security_headers_and_origin_guard(request:Request,call_next):
+    if request.method in {"POST","PUT","PATCH","DELETE"}:
+        origin=request.headers.get("origin")
+        fetch_site=request.headers.get("sec-fetch-site")
+        if fetch_site=="cross-site":
+            from fastapi.responses import JSONResponse
+            return JSONResponse({"detail":"Cross-site state-changing requests are not accepted."},status_code=403)
+        if origin:
+            from urllib.parse import urlsplit
+            parsed=urlsplit(origin);target=urlsplit(str(request.base_url))
+            if (parsed.scheme,parsed.netloc)!=(target.scheme,target.netloc):
+                from fastapi.responses import JSONResponse
+                return JSONResponse({"detail":"Cross-origin state-changing requests are not accepted."},status_code=403)
+    response=await call_next(request)
+    response.headers["X-Content-Type-Options"]="nosniff"
+    response.headers["X-Frame-Options"]="DENY"
+    response.headers["Referrer-Policy"]="strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"]="camera=(), microphone=(), geolocation=()"
+    return response
+
 @contextmanager
 def db():
     DB_PATH.parent.mkdir(parents=True,exist_ok=True)
-    con=sqlite3.connect(DB_PATH,timeout=10,isolation_level=None);con.row_factory=sqlite3.Row
+    con=sqlite3.connect(DB_PATH,timeout=10,isolation_level="DEFERRED");con.row_factory=sqlite3.Row
     con.execute("PRAGMA foreign_keys=ON");con.execute("PRAGMA journal_mode=WAL")
-    try: yield con
+    try:
+        yield con
+        con.commit()
+    except Exception:
+        con.rollback()
+        raise
     finally: con.close()
 
 def utcnow(): return datetime.now(timezone.utc)
