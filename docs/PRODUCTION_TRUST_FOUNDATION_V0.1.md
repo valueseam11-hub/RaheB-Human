@@ -22,3 +22,7 @@
 
 ## Apply and test
 Apply migrations/postgresql/0001_trust_foundation.sql with a migration administrator. Set RAHEB_DATABASE_URL for a non-superuser runtime role. For tests, set RAHEB_TEST_DATABASE_URL to a disposable PostgreSQL database and run the Postgres integration test. It creates/drops a test role; never point it at production.
+
+
+## Important limitation
+The schema and tenant transaction adapter are an isolated production-storage foundation. They are not yet wired into the public FastAPI route handlers, and the existing demo app still uses SQLite. Do not point the live website at this database until authentication, owner UUID mapping, migration role separation, connection-pool behavior, storage integration and security review have been completed.
