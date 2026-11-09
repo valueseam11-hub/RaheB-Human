@@ -47,7 +47,7 @@ class WorkTransitionTests(unittest.TestCase):
   s=WorkforceImpactSummary.from_workflows((a,b))
   self.assertEqual(s.workflow_count,2)
   self.assertEqual(s.total_cases,2)
-  self.assertEqual(s.total_net_human_minutes_saved,10)
+  self.assertEqual(s.total_net_human_minutes_saved,30)  # 40 minutes saved in workflow A, 10 lost in B
  def test_skill_evidence_requires_attribution(self):
   e=SkillEvidence("reconciliation","employee","assessor","observed exercise","evidence://1","DEMONSTRATED","2030-01-01T00:00:00Z")
   self.assertEqual(e.outcome,"DEMONSTRATED")

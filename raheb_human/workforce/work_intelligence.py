@@ -59,6 +59,11 @@ def assess_task(task: TaskInput)->TaskAssessment:
         reasons=["Requires human relationship, empathy, negotiation or context-sensitive interaction."]
         controls += ["AI may prepare context only; human conducts and owns the interaction"]
         responsibility="The human owns the relationship, communication and outcome."
+    elif task.known_procedure and any(t in text for t in _ROUTINE):
+        category,risk,mode=TaskCategory.ROUTINE,RiskLevel.LOW,DelegationMode.SUPERVISED_EXECUTION
+        reasons=["Matches a declared known procedure and bounded routine task pattern."]
+        controls += ["Run only within declared procedure and approved data scope","Stop on exception, missing source or scope mismatch"]
+        responsibility="Human owner remains accountable for supervision and exceptions."
     elif any(t in text for t in _JUDGMENT):
         category,risk,mode=TaskCategory.JUDGMENT,RiskLevel.HIGH,DelegationMode.PREPARE_ONLY
         reasons=["Contains interpretation, investigation, exception handling or professional judgment."]
@@ -69,11 +74,6 @@ def assess_task(task: TaskInput)->TaskAssessment:
         reasons=["Research or preparation output requires source review and professional validation."]
         controls += ["Cite source references and label unsupported or missing information"]
         responsibility="The professional validates accuracy, relevance and final recommendations."
-    elif task.known_procedure and any(t in text for t in _ROUTINE):
-        category,risk,mode=TaskCategory.ROUTINE,RiskLevel.LOW,DelegationMode.SUPERVISED_EXECUTION
-        reasons=["Matches a declared known procedure and bounded routine task pattern."]
-        controls += ["Run only within declared procedure and approved data scope","Stop on exception, missing source or scope mismatch"]
-        responsibility="Human owner remains accountable for supervision and exceptions."
     else:
         category,risk,mode=TaskCategory.UNKNOWN,RiskLevel.UNKNOWN,DelegationMode.HOLD
         reasons=["Cannot safely classify from supplied description and procedure evidence."]
