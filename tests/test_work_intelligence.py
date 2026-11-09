@@ -30,3 +30,31 @@ class WorkforceTests(unittest.TestCase):
  def test_employee_employer_boundary(self):
   b=WorkforceBoundary("e","org","rep",frozenset({"employer:finance"}),frozenset({"employee:personal"})); self.assertTrue(b.allows_employer_access("employer:finance")); self.assertFalse(b.allows_employer_access("employee:personal")); self.assertFalse(b.allows_employer_view_of_personal_data())
 if __name__=="__main__": unittest.main()
+
+class WorkTransitionTests(unittest.TestCase):
+ def test_workload_counts_hidden_human_effort(self):
+  w=WorkloadShift("recon",60,10,15,8,12,5,completed_cases=2,baseline_quality_score=.9,assisted_quality_score=.9)
+  self.assertEqual(w.total_assisted_human_minutes,50)
+  self.assertEqual(w.net_human_minutes_saved,10)
+  self.assertEqual(w.human_effort_per_case,25)
+ def test_negative_savings_and_quality_regression_are_flagged(self):
+  w=WorkloadShift("support",30,15,10,5,5,5,assisted_quality_score=.7,baseline_quality_score=.9,unresolved_exceptions=2)
+  self.assertTrue(w.requires_workflow_review)
+  self.assertEqual(w.net_human_minutes_saved,-10)
+ def test_summary_is_workflow_level(self):
+  a=WorkloadShift("a",60,10,10,0,0,0)
+  b=WorkloadShift("b",30,15,10,5,5,5)
+  s=WorkforceImpactSummary.from_workflows((a,b))
+  self.assertEqual(s.workflow_count,2)
+  self.assertEqual(s.total_cases,2)
+  self.assertEqual(s.total_net_human_minutes_saved,10)
+ def test_skill_evidence_requires_attribution(self):
+  e=SkillEvidence("reconciliation","employee","assessor","observed exercise","evidence://1","DEMONSTRATED","2030-01-01T00:00:00Z")
+  self.assertEqual(e.outcome,"DEMONSTRATED")
+  with self.assertRaises(ValueError):
+   SkillEvidence("skill","employee","assessor","AI generated quiz","ref","AI_PASSED","2030")
+ def test_learning_does_not_allow_ai_to_attest(self):
+  with self.assertRaises(ValueError):
+   LearningOpportunity("judgment","task","Evaluate exceptions",LearningMode.GUIDED_PRACTICE,ai_may_complete_assessment=True)
+ def test_guardrails_reject_worker_scoring_concept(self):
+  self.assertTrue(any("Do not infer employee replaceability" in x for x in describe_workforce_guardrails()))
