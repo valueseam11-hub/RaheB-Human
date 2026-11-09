@@ -121,3 +121,7 @@ In-memory scaffolding only; no counselling, sentiment analysis, persistent stora
 The synthetic workspace at `/app` now includes a local-only career evidence mapper. A person can enter a current role, a career direction, their own professional narrative, sourced role requirements and evidence they can substantiate. The browser pairs requirements and evidence by their displayed order and labels unmatched requirements `NOT YET EVIDENCED`; it does not infer a skills deficit or generate a candidate score.
 
 The panel also provides questions to ask employers about AI-use rules, assessment methods, human review, candidate data and accommodations. Inputs in this career panel are processed only in the browser: they are not posted to the API, persisted, or shared with employers. This is an interaction prototype, not a live job-search engine, résumé generator, verified portfolio, or hiring predictor. Do not enter sensitive personal, employer or client information in the synthetic preview.
+
+
+### Human Capability Continuity
+The workspace includes a synthetic, browser-local workflow review calculator that counts review, correction, exception handling, coordination and training alongside AI-assisted preparation. It flags zero or negative net human time savings for review. It is a workflow discussion aid—not an employee score, job-loss predictor or layoff recommendation. Inputs are not sent or saved. See [the workforce trust and transition safeguards](docs/WORKFORCE_INTELLIGENCE_AND_TRUST_V0.1.md).
