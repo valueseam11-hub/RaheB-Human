@@ -107,3 +107,28 @@ RaheB must not claim that a personal AI protects a user's job or salary. It shou
 - Do not use AI-generated output volume as a proxy for productivity.
 - Preserve negative savings, quality regressions and unresolved exceptions.
 - Do not present AI-completed tasks as proof of human skill.
+
+
+## Human Capability Continuity — workflow transition review
+
+AI adoption must be evaluated as a redesign of work, not as a headcount assumption. A system may complete a bounded task while leaving substantial human work in context-setting, validation, correction, exceptions, customer relationships, coordination, training and accountable decisions. A workflow's apparent speed-up is not a complete productivity measure.
+
+The RaheB Human workspace adds a synthetic, browser-local workflow calculator. It captures baseline human minutes and AI-assisted preparation, review, correction/rework, exception handling, coordination and training/practice time. Net human time saved is calculated as:
+
+`baseline human minutes − (AI-assisted preparation + review + correction + exception handling + coordination + training minutes)`
+
+A zero or negative result is explicitly flagged for workflow review. A positive result is only a time estimate; it does not prove improved quality, safe deployment, lower total cost, or a reason to remove a role. Validate quality, error rates, unresolved exceptions, customer outcomes, total operating costs and longer-term effects separately.
+
+### Human capability continuity safeguards
+- Do not recommend layoffs, role elimination or employee selection from workflow time metrics.
+- Do not infer employee replaceability, rank workers or build individual productivity scores.
+- Preserve human ownership of relationship-sensitive, ambiguous, consequential and exception decisions.
+- Make new AI responsibilities, accountability and review expectations transparent; discuss job-description and compensation implications through appropriate human processes rather than silently assuming them.
+- Preserve supervised practice, coaching and junior learning opportunities when routine work is automated.
+- Support redeployment, reskilling and humane transition planning; do not treat the Kübler-Ross stages as a diagnostic or force employees through a fixed sequence.
+- Provide honest communication and access to human support during role change. Do not use employee grief or anxiety as an adoption metric.
+
+### Evidence discipline
+The calculator is a browser-only synthetic prototype. Its values are user-entered and unverified; no data is sent to the server or retained. It is not an occupational risk model, financial model, compensation evaluator, clinical tool or employment decision system. The prototype does not establish any claim about how many employers are rehiring or the causal impact of AI on jobs. Such claims require independent, dated and methodologically clear evidence.
+
+The product must distinguish observed workflow facts, owner-entered estimates, assumptions and unverified claims. AI capability demonstrations do not establish safe operational substitution. Rehiring anecdotes do not prove that all roles are resilient; equally, automation exposure does not prove a job will disappear. Decisions require local workflow evidence, quality and risk assessment, worker consultation and accountable human judgment.

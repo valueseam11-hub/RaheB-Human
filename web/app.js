@@ -26,3 +26,24 @@ function careerMap(){
  '<p class="career-result-note">This is a private, in-browser working note. It has not been independently verified, saved, sent to an employer or assessed for hiring suitability. Review each claim and add dates, outcomes and source references before using it professionally.</p>';
 }
 $("career-map")?.addEventListener("click",careerMap);
+
+
+const workflowFields=["wf-baseline","wf-ai","wf-review","wf-correction","wf-exception","wf-coordination","wf-training","wf-cases"];
+function calculateWorkflowImpact(){
+ const values=workflowFields.map(id=>Number($(id).value));
+ const out=$("wf-output");
+ if(values.some((v,i)=>!Number.isFinite(v)||v<0||(i===7&&v<1)||v>1000000||(i===7&&!Number.isInteger(v)))){
+  out.innerHTML='<p class="error">Enter valid non-negative minutes and a positive whole number of completed cases.</p>';return;
+ }
+ const [baseline,ai,review,correction,exception,coordination,training,cases]=values;
+ const total=ai+review+correction+exception+coordination+training;
+ const saved=baseline-total;
+ const perCase=total/cases;
+ const needsReview=saved<=0;
+ out.innerHTML='<span class="state">WORKFLOW-LEVEL ESTIMATE · NOT AN EMPLOYEE SCORE</span><h3>'+ (saved>0?escapeHtml(String(saved))+' net human minutes saved':saved<0?escapeHtml(String(Math.abs(saved)))+' additional human minutes required':'No net human time saved')+'</h3>'+
+ '<div class="career-map-rows"><article><b>Baseline human effort</b><p>'+baseline+' min</p></article><article><b>Total assisted-work human effort</b><p>'+total+' min</p></article><article><b>Human effort per case</b><p>'+perCase.toFixed(1)+' min</p></article><article><b>Completed cases</b><p>'+cases+'</p></article></div>'+
+ '<p>Included AI preparation, review, correction/rework, exception handling, coordination and training/practice time. Net result = baseline minus all assisted-work human effort.</p>'+
+ (needsReview?'<p class="wf-warning">Workflow review required: there is no positive net human time saving. Investigate quality, unresolved exceptions, customer outcomes and whether the process should be redesigned.</p>':'<p class="wf-note">A positive time estimate is not proof of improved quality, safe deployment or a business case. Validate quality, errors, customer outcomes and the full operating cost.</p>')+
+ '<p class="career-result-note">This estimate describes the workflow only. It does not establish that any employee or role is replaceable.</p>';
+}
+$("wf-calculate")?.addEventListener("click",calculateWorkflowImpact);

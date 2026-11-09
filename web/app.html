@@ -10,4 +10,27 @@
 <div id="career-output" class="career-output" aria-live="polite"><p class="empty">Your career map will appear here. No score or hiring prediction is generated.</p></div>
 <div class="career-questions"><b>Questions to ask an employer</b><ul><li>What are your expectations and rules for AI use during recruitment and in this role?</li><li>Which assessments permit AI assistance, and which require unaided work?</li><li>How are AI-generated outputs reviewed, and who is accountable for decisions?</li><li>What happens to candidate data and assessment recordings?</li><li>Is there a human contact for questions, accommodations or review?</li></ul></div>
 <p class="career-boundary">Evidence mapping is a preparation aid, not a qualification check. “Not yet evidenced” does not mean “cannot do”. Verify every claim and submit applications yourself. This preview does not access job boards, contact employers or predict hiring outcomes.</p>
-</section><p class="app-foot">Preview only · AI disclosure is mandatory · Human approval does not imply that an external action has occurred.</p></main><script src="app.js"></script></body></html>
+</section><section class="app-card wide continuity-lab" aria-labelledby="continuity-title">
+<div class="card-kicker">05 / HUMAN CAPABILITY CONTINUITY · LOCAL PREVIEW</div>
+<h2 id="continuity-title">Measure the work AI actually changes.</h2>
+<p>Before deciding to automate or restructure a role, compare the full human effort before and after AI assistance. Include review, correction, exceptions, coordination and training—not just the time spent generating an output.</p>
+<div class="career-columns">
+<div>
+<label for="wf-baseline">Baseline human effort (minutes)</label><input id="wf-baseline" type="number" min="0" max="1000000" value="120">
+<label for="wf-ai">AI-assisted preparation time (human minutes)</label><input id="wf-ai" type="number" min="0" max="1000000" value="30">
+<label for="wf-review">Human review time (minutes)</label><input id="wf-review" type="number" min="0" max="1000000" value="25">
+<label for="wf-correction">Human correction / rework (minutes)</label><input id="wf-correction" type="number" min="0" max="1000000" value="15">
+</div>
+<div>
+<label for="wf-exception">Exception handling (minutes)</label><input id="wf-exception" type="number" min="0" max="1000000" value="10">
+<label for="wf-coordination">Coordination / handover (minutes)</label><input id="wf-coordination" type="number" min="0" max="1000000" value="10">
+<label for="wf-training">Training and supervised practice (minutes)</label><input id="wf-training" type="number" min="0" max="1000000" value="10">
+<label for="wf-cases">Completed cases</label><input id="wf-cases" type="number" min="1" max="1000000" value="1">
+</div>
+</div>
+<button class="btn primary" id="wf-calculate">Calculate net workflow impact →</button>
+<div id="wf-output" class="career-output" aria-live="polite"><p class="empty">Enter a real or synthetic workflow sample to see the full-effort calculation.</p></div>
+<div class="career-questions"><b>Human transition review</b><ul><li>Have employees been told how AI changes their responsibilities and what remains human-owned?</li><li>Are AI-use expectations, accountability and compensation implications being discussed transparently?</li><li>Have review, exception handling, customer relationships and operational follow-through been tested under real conditions?</li><li>Are junior employees retaining supervised practice and pathways to develop judgment?</li><li>Have redeployment, reskilling and employee support been considered before role removal?</li></ul></div>
+<p class="career-boundary">This calculator is a workflow discussion aid, not an employment decision tool. It does not assess individual workers, recommend layoffs or prove that a role is replaceable. Validate baseline data, service quality, error rates, customer outcomes and longer-term effects before acting. All entries stay in this browser and are not saved or sent.</p>
+</section>
+<p class="app-foot">Preview only · AI disclosure is mandatory · Human approval does not imply that an external action has occurred.</p></main><script src="app.js"></script></body></html>
