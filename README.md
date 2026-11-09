@@ -73,3 +73,6 @@ Run the new policy tests with:
     python -m unittest discover -s tests -p 'test_work_intelligence.py' -v
 
 This is deterministic policy scaffolding, not a validated occupational risk model or production authorization service. The module is not yet integrated with the web API, persistent task storage, model runtime or workplace connectors. Continue using synthetic demo data only. See `docs/WORKFORCE_INTELLIGENCE_AND_TRUST_V0.1.md`.
+
+### Work redistribution and professional growth
+The workforce layer also measures where human effort moves after AI is introduced: review, correction, exceptions and coordination are counted alongside AI-assisted preparation. It preserves negative time savings and quality regressions. Learning primitives support explanation, guided practice and human performance checks; AI cannot attest to a person's competence. The platform explicitly excludes employee replaceability scoring and employment decisions. See the workforce trust document for limitations and data boundaries.
