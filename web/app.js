@@ -13,3 +13,17 @@ function renderTask(){$("task-result").innerHTML='<span class="state">'+escapeHt
 async function review(decision){try{const result=await api("/api/tasks/"+encodeURIComponent(task.id)+"/review",{method:"POST",body:JSON.stringify({decision,note:"Reviewed in synthetic demonstration workspace."})});$("task-result").innerHTML='<p class="review-state">'+(decision==="approve_draft"?"✓ Human reviewed and approved this draft.":"Draft rejected by human reviewer.")+'</p><p>Recorded server-side as '+escapeHtml(result.state)+'. No external action took place.</p>';}catch(error){showError("task-result",error);}}
 function escapeHtml(value){return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));}
 startDemo();
+const careerFields=["career-current","career-target","career-story","career-requirements","career-evidence"];
+function careerMap(){
+ const current=$(careerFields[0]).value.trim(),target=$(careerFields[1]).value.trim(),story=$(careerFields[2]).value.trim();
+ const requirements=$(careerFields[3]).value.split("\\n").map(x=>x.trim()).filter(Boolean);
+ const evidence=$(careerFields[4]).value.split("\\n").map(x=>x.trim()).filter(Boolean);
+ const out=$("career-output");
+ if(!current&&!target&&!story&&!requirements.length&&!evidence.length){out.innerHTML='<p class="error">Add at least one career detail or requirement to build a map.</p>';return;}
+ const rows=requirements.map((req,i)=>({req,evidence:evidence[i]||""}));
+ out.innerHTML='<div class="career-result-head"><span class="state">OWNER-REVIEWED PREPARATION</span><h3>'+escapeHtml(current||"Current role not specified")+' → '+escapeHtml(target||"Career direction not specified")+'</h3></div>'+
+ (story?'<p><b>Your professional narrative</b><br>'+escapeHtml(story)+'</p>':'')+
+ (rows.length?'<h4>Requirement-by-requirement evidence map</h4><div class="career-map-rows">'+rows.map(row=>'<article><b>'+escapeHtml(row.req)+'</b><span class="state">'+(row.evidence?'EVIDENCE YOU IDENTIFIED':'NOT YET EVIDENCED')+'</span><p>'+(row.evidence?escapeHtml(row.evidence):'No evidence entered for this requirement. This is not a finding that you lack the skill.')+'</p></article>').join('')+'</div>':'<p>Add role requirements to compare them with evidence you can substantiate.</p>')+
+ '<p class="career-result-note">This is a private, in-browser working note. It has not been independently verified, saved, sent to an employer or assessed for hiring suitability. Review each claim and add dates, outcomes and source references before using it professionally.</p>';
+}
+$("career-map")?.addEventListener("click",careerMap);
