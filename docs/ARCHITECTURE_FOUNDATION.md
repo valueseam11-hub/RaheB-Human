@@ -46,3 +46,12 @@ Start with a professional operations representative for approved-document analys
 ## Deferred infrastructure
 
 FastAPI, PostgreSQL with row-level security, OIDC/WebAuthn, policy decision point, secrets broker, malware scanning, observability, model gateway and durable workflow orchestration remain subsequent integration milestones. This v0.2 package intentionally keeps the core dependency-free so policy and provenance behavior can be tested independently of vendors.
+
+
+## Human-in-the-Loop Visual Attestation
+
+Visual Attestation is an evidence-review capability within the existing representative lifecycle, not a separate authority plane. It consumes model assessments and references to preserved visual evidence, applies risk/uncertainty/conflict routing, and creates a human attestation bound to exact evidence and model-output digests. High, critical and unknown risk require review regardless of model confidence; missing evidence or unavailable reviewer capacity results in HOLD.
+
+Human verdicts include OBSERVED, NOT_OBSERVED, UNCERTAIN, EVIDENCE_UNUSABLE and DISAGREES_WITH_MODEL. The attestation records reviewer identity, time, rationale and whether the model output was revealed before the human's assessment. Human observations are evidence, not infallible truth. Corrections remain pending independent validation and are not automatically training labels.
+
+This capability grants no authority or physical control. Existing consent, owner/organisation authority, capability and execution gateway remain authoritative. An operational stop requires a separately authorised control integration. The initial dependency-free module is a policy reference; media storage, reviewer authentication, durable API, calibrated uncertainty, queue orchestration and hardware integrations remain deferred.
