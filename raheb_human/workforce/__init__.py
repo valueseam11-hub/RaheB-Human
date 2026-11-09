@@ -4,6 +4,7 @@ from .work_intelligence import ApprovalBinding, ContributionRecord, DelegationMo
 from .work_identity import EvidenceStatus, RecognitionTopic, RoleExpectation, WorkRealityEntry, RecognitionCase, build_recognition_summary, validate_disclosure
 from .career_transition import SkillEvidenceState, SkillRequirement, SkillEvidenceRecord, TransitionActionKind, DevelopmentAction, CareerTransitionPlan, HumanInteractionMode, HumanInteractionBoundary, build_transition_summary
 from .transition_support import TransitionConcern, SupportPreference, TransitionCheckIn, SupportResource, SupportPlan, ChangeCommunicationRecord, build_support_summary
+from .opportunity_intelligence import SignalConfidence, ApplicationStage, LabourMarketSignal, OpportunityRequirement, CandidateEvidence, OpportunityAssessment, HiringProcessQuestions, ApplicationRecord, build_opportunity_summary
 
 __all__ = [
     "EffortKind", "LearningMode", "LearningOpportunity", "SkillEvidence",
@@ -19,4 +20,7 @@ __all__ = [
     "HumanInteractionMode", "HumanInteractionBoundary", "build_transition_summary",
     "TransitionConcern", "SupportPreference", "TransitionCheckIn", "SupportResource",
     "SupportPlan", "ChangeCommunicationRecord", "build_support_summary",
+    "SignalConfidence", "ApplicationStage", "LabourMarketSignal",
+    "OpportunityRequirement", "CandidateEvidence", "OpportunityAssessment",
+    "HiringProcessQuestions", "ApplicationRecord", "build_opportunity_summary",
 ]
