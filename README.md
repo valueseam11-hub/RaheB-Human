@@ -1,26 +1,30 @@
 # RaheB Human
 
-**Own an AI that represents you and your profession. It works for you. You remain in control.**
+**Bring your professional AI to work. You remain the human in control.**
 
-RaheB Human is building human-owned professional AI representatives. A representative can prepare, analyse, research and assist under a human owner's identity, approved knowledge, explicit authority and continuing oversight. It must disclose that it is AI and must never imply that the human personally performed work they did not perform.
+RaheB Human is infrastructure through which people build, own, develop and bring their own professional AI representatives into work, while organisations discover, assess and deploy human professionals together with those representatives under explicit workplace controls.
 
-## Architecture foundation v0.1
+An individual builds a representative around their profession, approved knowledge, real workflows and tested capabilities. They retain ownership and control, choose what evidence to share, and can bring the representative to a new workplace. An organisation can hire the human professional and authorise a bounded deployment of that representative into its own approved workflows. The employer does not acquire ownership of the person's personal AI.
 
-The dependency-free Python core establishes distinct owner and representative identities, versioned authority contracts, purpose-specific consent, scoped AI capability evidence, a fail-closed admission gateway and a hash-linked evidence ledger.
+**The platform serves two sides:**
+- **Professional AI Builder:** identity, profession and task profile, representative creation, approved knowledge, capability testing, learning, authority controls and portable evidence.
+- **Organisation Workforce Deployment:** role/workflow definition, evidence-based professional discovery, representative assessment, employer-side data/tool permissions, supervised deployment, human approvals and workflow outcome evidence.
 
-## Personal Representative Control Plane v0.1
+**The core distinction:** human capability, AI representative capability and joint human–AI work evidence are separate. A representative's test result does not prove the owner's competence. AI-prepared work is never misrepresented as human-performed work.
 
-HRCP coordinates the representative lifecycle:
+**The workplace boundary:** the owner authorises their representative; the organisation authorises its systems, data, tools and workflows. Where employer/client resources are involved, both applicable permissions must be current. Missing, expired, revoked or uncertain authority means HOLD.
 
-- Register a representative against a verified owner identity and approved knowledge references.
-- Require visible AI disclosure.
-- Activate only with current service-processing consent and a matching, current authority contract.
-- Pause or revoke the representative, cancel registered pending work and invalidate outstanding approvals.
-- Require scoped capability evidence, current consent and a matching representative version before admission.
-- Bind high-impact approvals to the exact task digest, owner, representative version, authority version and expiry; consume each approval once.
-- Record lifecycle and admission evidence.
+**The product is not** a generic chatbot builder, résumé tool, job board, employee surveillance suite, worker ranking or replaceability score, or automated employment-decision system. Career development and talent discovery support the human-owned professional representative; they are not the product's centre.
 
-A successful admission is **not execution**. The reference implementation always returns `side_effect_permitted=False`; no external tool is invoked.
+## Architecture Foundation v1.0
+
+The canonical product architecture is defined in `docs/ARCHITECTURE_FOUNDATION.md`. It sets out the five axioms, individual and organisation journeys, professional task intelligence, separate human/AI capability registries, Human Capability Continuity, two-key workplace authority, evidence and provenance, contribution attribution, portability and explicit exclusions.
+
+## Engineering status
+
+The repository contains testable architecture references and synthetic prototypes, not a production-ready AI workforce platform. Some foundations are in-memory or browser-local and are not integrated with production identity, persistent multi-tenant storage, live model execution, workplace connectors or durable operational controls. Use synthetic data only unless a specific component is explicitly verified for production use.
+
+Every capability must be described honestly as specified, prototyped, tested, integrated or production-verified. Architecture documentation is not proof of implementation.
 
 ## Quick start
 
@@ -28,100 +32,3 @@ Requires Python 3.11+; no third-party runtime dependencies.
 
     python -m unittest discover -s tests -v
 
-## Current scope and limitations
-
-This is a testable architecture reference, not a production agent platform. HRCP is in-memory and process-local. It does not provide authentication, durable state, distributed revocation, secure timestamps, cryptographic signatures, tenant isolation, a model runtime, an API, or external tool execution. Caller-supplied owner IDs are not authentication. Do not use this implementation with live customer data or to authorize real-world side effects.
-
-See:
-- docs/ARCHITECTURE_FOUNDATION.md
-- docs/THREAT_MODEL.md
-- docs/PERSONAL_REPRESENTATIVE_CONTROL_PLANE.md
-
-
-## Personal Intelligence & Knowledge Engine v0.1
-
-The owner-scoped knowledge reference store adds source metadata, per-source versioning, content digests, explicit owner approval, withdrawal and scope-filtered lexical retrieval. Submission and retrieval require both service-processing consent and separate persistent-memory consent. New source versions remain pending until approved. Retrieval returns source citations and treats content as untrusted input.
-
-The reference implementation is in-memory and accepts caller-provided text only. It does not parse uploads, scan malware, authenticate owners, persist data, encrypt content or provide production tenant isolation. It must not be used with live customer, employer or client data.
-
-
-## Website and application API v0.1
-
-The public website is served by the FastAPI application. The interactive workspace is available at `/app`. Run locally with:
-
-    pip install -r requirements.txt
-    uvicorn raheb_human.api.app:app --reload
-
-The workspace opens a short-lived, synthetic-only guest session. It supports a persisted representative draft, fixed synthetic knowledge fixtures, owner approval, deterministic task drafts, human review/rejection and a hash-linked evidence trail. It does not call an AI model or execute external actions.
-
-Public account registration and personal/employer/client knowledge ingestion are deliberately disabled until approved legal documents, purpose-specific consent controls and production security safeguards are completed. See `docs/WEB_APPLICATION_API_V0.1.md`.
-
-
-## Workforce Intelligence & Trust Foundation v0.1
-
-The workforce module adds a conservative task assessment and evidence-first supervised workbench:
-
-- Classifies routine, research, judgment, high-impact, human-interaction and unknown tasks.
-- Uses SUPERVISED_EXECUTION, PREPARE_ONLY, HUMAN_OWNED or HOLD; missing approved data scope forces HOLD.
-- Requires scoped evidence references before draft preparation; drafts never execute or send work.
-- Provides exact task/output/owner/representative/authority approval-binding validation with expiry and nonce checks. Durable atomic nonce consumption is not implemented.
-- Separates employee-owned personal scopes from employer-controlled system scopes.
-- Calculates net time saved after AI preparation, human review and rework; negative savings remain visible.
-
-Run the new policy tests with:
-
-    python -m unittest discover -s tests -p 'test_work_intelligence.py' -v
-
-This is deterministic policy scaffolding, not a validated occupational risk model or production authorization service. The module is not yet integrated with the web API, persistent task storage, model runtime or workplace connectors. Continue using synthetic demo data only. See `docs/WORKFORCE_INTELLIGENCE_AND_TRUST_V0.1.md`.
-
-### Work redistribution and professional growth
-The workforce layer also measures where human effort moves after AI is introduced: review, correction, exceptions and coordination are counted alongside AI-assisted preparation. It preserves negative time savings and quality regressions. Learning primitives support explanation, guided practice and human performance checks; AI cannot attest to a person's competence. The platform explicitly excludes employee replaceability scoring and employment decisions. See the workforce trust document for limitations and data boundaries.
-
-
-## Work Identity & Recognition Intelligence v0.1
-
-The new owner-controlled work identity layer records the difference between formal role expectations and actual work performed as AI changes workflows. It captures observation periods, frequency, AI assistance, retained human responsibility, evidence status and optional baseline/observed outcome measures. It prepares neutral recognition summaries for discussion about role scope, workload, skills, business outcomes, compensation review or title/level review.
-
-Evidence levels remain distinct (self-reported, documented, corroborated, disputed and not verified). Potential role-scope gaps are review prompts, not proof of contractual change. No pay, promotion, job-security or legal outcome is predicted. Disclosure requires explicit owner approval and selected entries. No employee monitoring, ranking or replaceability scoring is supported.
-
-Run its tests with:
-
-    python -m unittest discover -s tests -p 'test_work_identity.py' -v
-
-This v0.1 layer is in-memory scaffolding only; it is not connected to persistent storage, the web API, employer systems or compensation benchmarking. Use synthetic data only. See `docs/WORK_IDENTITY_AND_RECOGNITION_V0.1.md`.
-
-
-## Career Transition & Human Interaction Boundaries v0.1
-
-The workforce foundation now includes owner-directed career transition planning. It maps an owner-defined goal to dated, sourced skill requirements, attributable evidence and human development actions. Missing evidence is labelled NOT_YET_EVIDENCED, not lack of ability; disputed evidence is preserved. The layer does not predict layoffs, employability, salary or hiring outcomes.
-
-Owners can mark professional communication and relationship work as HUMAN_OWNED, AI_PREPARE_ONLY or AI_ASSISTED_WITH_APPROVAL. AI-assisted interaction requires purpose-bound, expiring approval; existing task risk and authority controls still apply.
-
-Run its tests with:
-
-    python -m unittest discover -s tests -p 'test_career_transition.py' -v
-
-This is deterministic in-memory scaffolding only. No live labour-market feed, role matching, persistent storage, API, résumé generation or employer integration is implemented. See `docs/CAREER_TRANSITION_AND_HUMAN_BOUNDARIES_V0.1.md`.
-
-
-## Human Transition & Resilience Support v0.1
-
-A private, person-directed check-in lets an owner record concerns about professional identity, career direction, financial uncertainty, skill confidence, workload, belonging and trust; choose the support they want; and prepare practical next steps. An organisational communication record separates confirmed facts from unknowns and names an accountable contact and next update.
-
-This is deliberately non-clinical: no AI-grief diagnosis, grief-stage assignment, mental-health inference, resilience score or fitness-for-work score. Check-ins are private by default. Employer sharing requires explicit owner approval. The layer must never be used for performance management, redundancy selection, worker ranking or employability scoring.
-
-Run its tests with:
-
-    python -m unittest discover -s tests -p 'test_transition_support.py' -v
-
-In-memory scaffolding only; no counselling, sentiment analysis, persistent storage, API, employer dashboard or emergency-support integration. Not production-ready. See `docs/HUMAN_TRANSITION_AND_RESILIENCE_SUPPORT_V0.1.md`.
-
-## Career Intelligence Workspace v0.1
-
-The synthetic workspace at `/app` now includes a local-only career evidence mapper. A person can enter a current role, a career direction, their own professional narrative, sourced role requirements and evidence they can substantiate. The browser pairs requirements and evidence by their displayed order and labels unmatched requirements `NOT YET EVIDENCED`; it does not infer a skills deficit or generate a candidate score.
-
-The panel also provides questions to ask employers about AI-use rules, assessment methods, human review, candidate data and accommodations. Inputs in this career panel are processed only in the browser: they are not posted to the API, persisted, or shared with employers. This is an interaction prototype, not a live job-search engine, résumé generator, verified portfolio, or hiring predictor. Do not enter sensitive personal, employer or client information in the synthetic preview.
-
-
-### Human Capability Continuity
-The workspace includes a synthetic, browser-local workflow review calculator that counts review, correction, exception handling, coordination and training alongside AI-assisted preparation. It flags zero or negative net human time savings for review. It is a workflow discussion aid—not an employee score, job-loss predictor or layoff recommendation. Inputs are not sent or saved. See [the workforce trust and transition safeguards](docs/WORKFORCE_INTELLIGENCE_AND_TRUST_V0.1.md).
