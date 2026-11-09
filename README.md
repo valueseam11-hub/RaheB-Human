@@ -102,3 +102,16 @@ Run its tests with:
     python -m unittest discover -s tests -p 'test_career_transition.py' -v
 
 This is deterministic in-memory scaffolding only. No live labour-market feed, role matching, persistent storage, API, résumé generation or employer integration is implemented. See `docs/CAREER_TRANSITION_AND_HUMAN_BOUNDARIES_V0.1.md`.
+
+
+## Human Transition & Resilience Support v0.1
+
+A private, person-directed check-in lets an owner record concerns about professional identity, career direction, financial uncertainty, skill confidence, workload, belonging and trust; choose the support they want; and prepare practical next steps. An organisational communication record separates confirmed facts from unknowns and names an accountable contact and next update.
+
+This is deliberately non-clinical: no AI-grief diagnosis, grief-stage assignment, mental-health inference, resilience score or fitness-for-work score. Check-ins are private by default. Employer sharing requires explicit owner approval. The layer must never be used for performance management, redundancy selection, worker ranking or employability scoring.
+
+Run its tests with:
+
+    python -m unittest discover -s tests -p 'test_transition_support.py' -v
+
+In-memory scaffolding only; no counselling, sentiment analysis, persistent storage, API, employer dashboard or emergency-support integration. Not production-ready. See `docs/HUMAN_TRANSITION_AND_RESILIENCE_SUPPORT_V0.1.md`.
