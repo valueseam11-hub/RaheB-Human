@@ -25,3 +25,10 @@ An attestation proves that a named reviewer recorded a verdict against specific 
 
 ## Implementation boundary
 The dependency-free core defines typed evidence, model assessment, routing, attestation, intervention and correction-feedback contracts. It does not implement media storage, reviewer authentication/qualification, durable API endpoints, multi-party adjudication, operational stop integration, calibrated model uncertainty, queue orchestration or training pipelines. Synthetic data only until those controls are implemented and independently tested.
+
+
+## Browser review workspace (synthetic demo)
+
+The existing `/app` workspace now includes a Visual Attestation panel. It presents a clearly labelled synthetic vector scene, asks for an independent observation before revealing the illustrative model assessment, and then offers five verdicts including UNCERTAIN, EVIDENCE_UNUSABLE and DISAGREES_WITH_MODEL. The verdict summary is held in browser memory only. The reference identifier shown by the UI is not a cryptographic digest or signature.
+
+The panel is a UX demonstration, not an authenticated reviewer workflow. It does not store media or verdicts, call a vision model, establish reviewer competence, create durable evidence, or trigger a stop command. The synthetic scene is not a camera feed. Production implementation must replace the local fixture with governed media custody and authenticated APIs only after consent, privacy, security and retention controls are in place.
