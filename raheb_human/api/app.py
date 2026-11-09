@@ -70,7 +70,7 @@ def verify_evidence(con,owner_id):
 
 def password_hash(password,salt=None):
     salt=salt or secrets.token_bytes(16);derived=hashlib.pbkdf2_hmac("sha256",password.encode(),salt,310000)
-    return f"pbkdf2_sha256$310000$\\{salt.hex()}$\\{derived.hex()}"
+    return "pbkdf2_sha256$310000$" + salt.hex() + "$" + derived.hex()
 
 def password_matches(password,stored):
     try:
@@ -103,11 +103,7 @@ class RepresentativeIn(BaseModel):
     profession:str=Field(min_length=2,max_length=100)
 class KnowledgeIn(BaseModel):
     representative_id:str
-    title:str=Field(min_length=2,max_length=160)
-    source_type:str=Field(min_length=2,max_length=50)
-    source_origin:str=Field(min_length=2,max_length=160)
-    content:str=Field(min_length=1,max_length=100000)
-    data_scope:str=Field(min_length=2,max_length=100)
+    fixture_id:str=Field(pattern="^(month_end|reporting|controls)$")
 class TaskIn(BaseModel):
     representative_id:str
     task_type:str=Field(pattern="^(reconciliation_checklist|management_report_outline|control_summary)$")
@@ -145,6 +141,37 @@ def logout(request:Request,response:Response):
     return {"authenticated":False}
 @app.get("/api/auth/me")
 def me(user=Depends(session_user)):return {"user":user,"authenticated":True}
+
+@app.post("/api/demo/session")
+def create_demo_session(response:Response):
+    """Create an isolated short-lived workspace populated only with server fixtures."""
+    uid="demo-"+str(uuid4())
+    email=uid+"@demo.rahebhuman.invalid"
+    token=secrets.token_urlsafe(48)
+    expires=utcnow()+timedelta(hours=2)
+    with db() as con:
+        con.execute("INSERT INTO users(id,email,password_hash,created_at) VALUES(?,?,?,?)",
+                    (uid,email,password_hash(secrets.token_urlsafe(32)),iso_now()))
+        con.execute("INSERT INTO sessions(token_hash,user_id,expires_at,created_at) VALUES(?,?,?,?)",
+                    (digest(token),uid,expires.isoformat(),iso_now()))
+    response.set_cookie(SESSION_COOKIE,token,httponly=True,secure=COOKIE_SECURE,samesite="strict",
+                        max_age=7200,path="/")
+    return {"authenticated":True,"mode":"synthetic_demo","expires_at":expires.isoformat(),
+            "notice":"Temporary synthetic-only workspace. Do not enter personal, employer or client information."}
+
+@app.delete("/api/demo/session")
+def end_demo_session(request:Request,response:Response):
+    token=request.cookies.get(SESSION_COOKIE)
+    if token:
+        with db() as con:
+            row=con.execute("SELECT user_id FROM sessions WHERE token_hash=?",(digest(token),)).fetchone()
+            if row and row["user_id"].startswith("demo-"):
+                con.execute("DELETE FROM users WHERE id=?",(row["user_id"],))
+            else:
+                con.execute("DELETE FROM sessions WHERE token_hash=?",(digest(token),))
+    response.delete_cookie(SESSION_COOKIE,path="/",secure=COOKIE_SECURE,httponly=True,samesite="strict")
+    return {"ended":True}
+
 @app.post("/api/representatives",status_code=201)
 def create_representative(body:RepresentativeIn,user=Depends(session_user)):
     rid=str(uuid4())
@@ -160,20 +187,65 @@ def owned_rep(con,owner_id,rep_id):
     row=con.execute("SELECT * FROM representatives WHERE id=? AND owner_id=?",(rep_id,owner_id)).fetchone()
     if not row:raise HTTPException(status_code=404,detail="Representative not found")
     return row
+DEMO_FIXTURES={
+ "month_end":("Month-end reconciliation procedure","Match synthetic ledger entries to synthetic approved invoices. Flag unmatched items. Record exceptions for owner review."),
+ "reporting":("Management reporting checklist","State reporting period, reconcile synthetic source totals, explain material variances and identify missing evidence."),
+ "controls":("Two-person review control","A second authorized human reviews sensitive changes. Record reviewer, decision, timestamp and evidence.")
+}
+
 @app.post("/api/knowledge",status_code=201)
 def submit_knowledge(body:KnowledgeIn,user=Depends(session_user)):
-    with db() as con:owned_rep(con,user["id"],body.representative_id)
-    raise HTTPException(status_code=403,detail="Knowledge ingestion is disabled until approved legal documents and separate persistent-memory consent are live.")
+    if not user["id"].startswith("demo-"):
+        raise HTTPException(status_code=403,detail="Personal knowledge ingestion remains disabled until approved legal documents and persistent-memory consent controls are published.")
+    with db() as con:
+        owned_rep(con,user["id"],body.representative_id)
+        title,content=DEMO_FIXTURES[body.fixture_id]
+        kid=str(uuid4());content_digest=digest(content)
+        row=con.execute("SELECT COALESCE(MAX(version),0)+1 AS next FROM knowledge WHERE owner_id=? AND title=?",(user["id"],title)).fetchone()
+        version=row["next"]
+        con.execute("""INSERT INTO knowledge(id,owner_id,representative_id,title,source_type,source_origin,content,content_digest,data_scope,version,state,created_at)
+                       VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (kid,user["id"],body.representative_id,title,"synthetic_demo","RaheB built-in fixture",content,content_digest,"demo:synthetic",version,"PENDING_OWNER_REVIEW",iso_now()))
+        audit(con,user["id"],"DEMO_KNOWLEDGE_SUBMITTED",kid,{"title":title,"digest":content_digest,"state":"PENDING_OWNER_REVIEW"})
+    return {"id":kid,"title":title,"content":content,"content_digest":content_digest,"data_scope":"demo:synthetic","version":version,"state":"PENDING_OWNER_REVIEW"}
+
+@app.post("/api/knowledge/{knowledge_id}/approve")
+def approve_knowledge(knowledge_id:str,user=Depends(session_user)):
+    if not user["id"].startswith("demo-"):
+        raise HTTPException(status_code=403,detail="Persistent personal knowledge approval is not enabled.")
+    with db() as con:
+        row=con.execute("SELECT * FROM knowledge WHERE id=? AND owner_id=?",(knowledge_id,user["id"])).fetchone()
+        if not row:raise HTTPException(status_code=404,detail="Knowledge record not found")
+        if row["state"]!="PENDING_OWNER_REVIEW":raise HTTPException(status_code=409,detail="Knowledge record is not pending review")
+        if digest(row["content"])!=row["content_digest"]:raise HTTPException(status_code=409,detail="Knowledge content integrity check failed")
+        con.execute("UPDATE knowledge SET state='APPROVED',reviewed_at=? WHERE id=?",(iso_now(),knowledge_id))
+        audit(con,user["id"],"DEMO_KNOWLEDGE_APPROVED",knowledge_id,{"digest":row["content_digest"]})
+    return {"id":knowledge_id,"state":"APPROVED"}
 @app.get("/api/knowledge")
 def list_knowledge(user=Depends(session_user)):
     with db() as con:rows=con.execute("SELECT id,representative_id,title,source_type,source_origin,content_digest,data_scope,version,state,created_at,reviewed_at FROM knowledge WHERE owner_id=? ORDER BY created_at DESC",(user["id"],)).fetchall()
     return [dict(row) for row in rows]
 @app.post("/api/tasks",status_code=201)
 def create_task(body:TaskIn,user=Depends(session_user)):
+    if not user["id"].startswith("demo-"):
+        raise HTTPException(status_code=403,detail="Real task processing is not enabled. No model or external action will be invoked.")
     with db() as con:
-        rep=owned_rep(con,user["id"],body.representative_id)
-        if rep["state"]!="ACTIVE":raise HTTPException(status_code=409,detail="Representative is not active; task admission is on HOLD.")
-    raise HTTPException(status_code=403,detail="Task execution is not enabled in this build. No model or external action will be invoked.")
+        owned_rep(con,user["id"],body.representative_id)
+        sources=con.execute("SELECT * FROM knowledge WHERE owner_id=? AND representative_id=? AND state='APPROVED' AND data_scope='demo:synthetic' ORDER BY created_at",(user["id"],body.representative_id)).fetchall()
+        if not sources:raise HTTPException(status_code=409,detail="No owner-approved synthetic knowledge is available.")
+        labels={"reconciliation_checklist":"Reconciliation checklist draft","management_report_outline":"Management report outline","control_summary":"Control considerations summary"}
+        bullets={
+          "reconciliation_checklist":["Confirm reporting period and ledger extract.","Match each ledger entry to an approved invoice.","List unmatched items and supporting evidence.","Prepare exceptions for owner review."],
+          "management_report_outline":["State reporting period and source scope.","Summarise reconciled totals.","Describe material variances and unresolved items.","Identify evidence gaps and decisions required."],
+          "control_summary":["Identify sensitive or irreversible steps.","Require a second authorized human for sensitive changes.","Record reviewer, decision, timestamp and evidence."]
+        }
+        tid=str(uuid4());draft={"title":labels[body.task_type],"bullets":bullets[body.task_type],"generated_by":"deterministic_synthetic_demo","ai_model_invoked":False,"external_action_performed":False}
+        source_ids=[row["id"] for row in sources]
+        con.execute("""INSERT INTO tasks(id,owner_id,representative_id,task_type,request_text,draft_json,source_ids_json,state,created_at)
+                       VALUES(?,?,?,?,?,?,?,?,?)""",
+                    (tid,user["id"],body.representative_id,body.task_type,body.request_text,json.dumps(draft),json.dumps(source_ids),"AWAITING_HUMAN_REVIEW",iso_now()))
+        audit(con,user["id"],"DEMO_TASK_DRAFT_CREATED",tid,{"task_type":body.task_type,"source_ids":source_ids,"state":"AWAITING_HUMAN_REVIEW"})
+    return {"id":tid,**draft,"source_ids":source_ids,"state":"AWAITING_HUMAN_REVIEW"}
 @app.get("/api/tasks")
 def list_tasks(user=Depends(session_user)):
     with db() as con:rows=con.execute("SELECT id,representative_id,task_type,request_text,draft_json,source_ids_json,state,created_at,reviewed_at,review_note FROM tasks WHERE owner_id=? ORDER BY created_at DESC",(user["id"],)).fetchall()
