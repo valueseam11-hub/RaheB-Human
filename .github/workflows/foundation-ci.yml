@@ -19,6 +19,6 @@ jobs:
           python-version: "3.12"
           cache: "pip"
       - name: Install API test dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt -r requirements-dev.txt
       - name: Run full unit and API test suite
         run: python -m unittest discover -s tests -v
