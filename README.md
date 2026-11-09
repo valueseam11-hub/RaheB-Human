@@ -89,3 +89,16 @@ Run its tests with:
     python -m unittest discover -s tests -p 'test_work_identity.py' -v
 
 This v0.1 layer is in-memory scaffolding only; it is not connected to persistent storage, the web API, employer systems or compensation benchmarking. Use synthetic data only. See `docs/WORK_IDENTITY_AND_RECOGNITION_V0.1.md`.
+
+
+## Career Transition & Human Interaction Boundaries v0.1
+
+The workforce foundation now includes owner-directed career transition planning. It maps an owner-defined goal to dated, sourced skill requirements, attributable evidence and human development actions. Missing evidence is labelled NOT_YET_EVIDENCED, not lack of ability; disputed evidence is preserved. The layer does not predict layoffs, employability, salary or hiring outcomes.
+
+Owners can mark professional communication and relationship work as HUMAN_OWNED, AI_PREPARE_ONLY or AI_ASSISTED_WITH_APPROVAL. AI-assisted interaction requires purpose-bound, expiring approval; existing task risk and authority controls still apply.
+
+Run its tests with:
+
+    python -m unittest discover -s tests -p 'test_career_transition.py' -v
+
+This is deterministic in-memory scaffolding only. No live labour-market feed, role matching, persistent storage, API, résumé generation or employer integration is implemented. See `docs/CAREER_TRANSITION_AND_HUMAN_BOUNDARIES_V0.1.md`.
