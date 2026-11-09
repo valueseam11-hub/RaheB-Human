@@ -58,3 +58,8 @@ class WorkTransitionTests(unittest.TestCase):
    LearningOpportunity("judgment","task","Evaluate exceptions",LearningMode.GUIDED_PRACTICE,ai_may_complete_assessment=True)
  def test_guardrails_reject_worker_scoring_concept(self):
   self.assertTrue(any("Do not infer employee replaceability" in x for x in describe_workforce_guardrails()))
+
+ def test_training_time_is_not_hidden(self):
+  w=WorkloadShift("onboarding",60,10,10,0,0,0,training_minutes=15)
+  self.assertEqual(w.total_assisted_human_minutes,35)
+  self.assertEqual(w.net_human_minutes_saved,25)
