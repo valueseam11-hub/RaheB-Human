@@ -1,6 +1,7 @@
 """RaheB Human web/API application. Development reference; not production-hardened."""
 from __future__ import annotations
-import hashlib,hmac,json,os,secrets,sqlite3
+import hashlib,hmac,json,os,secrets
+from raheb_human.core import database as sqlite3
 from contextlib import contextmanager
 from datetime import datetime,timedelta,timezone
 from pathlib import Path
@@ -46,9 +47,7 @@ async def security_headers_and_origin_guard(request:Request,call_next):
 
 @contextmanager
 def db():
-    DB_PATH.parent.mkdir(parents=True,exist_ok=True)
-    con=sqlite3.connect(DB_PATH,timeout=10,isolation_level="DEFERRED");con.row_factory=sqlite3.Row
-    con.execute("PRAGMA foreign_keys=ON");con.execute("PRAGMA journal_mode=WAL")
+    con=sqlite3.connect(DB_PATH,timeout=10,isolation_level="DEFERRED")
     try:
         yield con
         con.commit()
@@ -142,7 +141,9 @@ class ReviewIn(BaseModel):
 def startup():init_db()
 
 @app.get("/api/health")
-def health():return {"status":"ok","service":"raheb-human-api","version":"0.1.0","mode":"development-reference" if not PRODUCTION_CONFIGURED else "configured-reference","external_actions_enabled":False}
+def health():
+    with db() as con: con.execute("SELECT 1").fetchone()
+    return {"status":"ok","service":"raheb-human-api","version":"0.2.0","database":"postgresql" if sqlite3.DATABASE_URL else "sqlite-development","mode":"production-configured" if PRODUCTION_CONFIGURED else "development","external_actions_enabled":False}
 @app.get("/api/public-config")
 def public_config():return {"product":"RaheB Human","ai_disclosure":"This is an AI representative, not the human owner.","legal":legal_status(),"account_creation_enabled":False,"personal_data_upload_enabled":False,"external_actions_enabled":False}
 @app.get("/api/legal-status")
@@ -296,4 +297,4 @@ def evidence(user=Depends(session_user)):
 def app_page():return FileResponse(WEB_ROOT/"app.html")
 @app.get("/")
 def home_page():return FileResponse(WEB_ROOT/"index.html")
-if WEB_ROOT.exists():app.mount("/",StaticFiles(directory=WEB_ROOT,html=True),name="web-assets")
+if WEB_ROOT.exists():app.mount("/assets",StaticFiles(directory=WEB_ROOT),name="web-assets")
