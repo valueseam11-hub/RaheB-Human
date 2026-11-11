@@ -297,4 +297,4 @@ def evidence(user=Depends(session_user)):
 def app_page():return FileResponse(WEB_ROOT/"app.html")
 @app.get("/")
 def home_page():return FileResponse(WEB_ROOT/"index.html")
-if WEB_ROOT.exists():app.mount("/assets",StaticFiles(directory=WEB_ROOT),name="web-assets")
+if WEB_ROOT.exists():app.mount("/",StaticFiles(directory=WEB_ROOT,html=True),name="web-assets")
