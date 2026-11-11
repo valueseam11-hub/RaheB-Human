@@ -25,6 +25,11 @@ class Connection:
     def commit(self): self.raw.commit()
     def rollback(self): self.raw.rollback()
     def close(self): self.raw.close()
+    def __enter__(self): return self
+    def __exit__(self, typ, value, tb):
+        if typ is None: self.commit()
+        else: self.rollback()
+        self.close()
 
 def connect(database, timeout=10, isolation_level="DEFERRED"):
     if DATABASE_URL:
