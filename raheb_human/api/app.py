@@ -10,6 +10,10 @@ from fastapi import Depends,FastAPI,HTTPException,Request,Response
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel,Field
+from raheb_human.authority.persistence import (
+    AuthorityHold, AuthorityStoreError, init_authority_schema, issue_warrant,
+    revoke_warrant, approve_exact_action, admit_once, verify_authority_events,
+)
 
 APP_ROOT=Path(__file__).resolve().parents[2]
 WEB_ROOT=APP_ROOT/"web"
@@ -76,6 +80,7 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_tasks_owner ON tasks(owner_id,created_at);
         CREATE INDEX IF NOT EXISTS idx_evidence_owner_seq ON evidence(owner_id,seq);
         """)
+        init_authority_schema(con)
 
 def audit(con,owner_id,event,subject,payload):
     row=con.execute("SELECT record_digest FROM evidence WHERE owner_id=? ORDER BY seq DESC LIMIT 1",(owner_id,)).fetchone()
@@ -218,6 +223,142 @@ DEMO_FIXTURES={
  "reporting":("Management reporting checklist","State reporting period, reconcile synthetic source totals, explain material variances and identify missing evidence."),
  "controls":("Two-person review control","A second authorized human reviews sensitive changes. Record reviewer, decision, timestamp and evidence.")
 }
+
+
+class AuthorityWarrantIn(BaseModel):
+    representative_id: str
+    representative_version: int = Field(ge=1)
+    purpose: str = Field(min_length=3, max_length=240)
+    actions: list[str] = Field(min_length=1, max_length=20)
+    resources: list[str] = Field(min_length=1, max_length=20)
+    money_limit: str = Field(pattern=r"^\\d+(?:\\.\\d{1,2})?$")
+    token_limit: int = Field(ge=0, le=10000000)
+    retry_limit: int = Field(ge=0, le=100)
+    agent_limit: int = Field(ge=1, le=100)
+    duration_limit_seconds: int = Field(ge=1, le=86400)
+    expires_at: datetime
+
+class AuthorityRevokeIn(BaseModel):
+    reason: str = Field(min_length=3, max_length=500)
+
+class ExactApprovalIn(BaseModel):
+    warrant_id: str
+    action: str
+    resource: str
+    purpose: str
+    output_digest: str = Field(pattern=r"^[0-9a-fA-F]{64}$")
+    task_id: str | None = Field(default=None, max_length=100)
+    expires_at: datetime
+
+class AuthorityAdmissionIn(BaseModel):
+    approval_id: str
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    action: str
+    resource: str
+    purpose: str
+    output_digest: str = Field(pattern=r"^[0-9a-fA-F]{64}$")
+    estimated_money: str = Field(pattern=r"^\\d+(?:\\.\\d{1,2})?$")
+    estimated_tokens: int = Field(ge=0, le=10000000)
+
+def require_synthetic_authority_demo(user):
+    if not user["id"].startswith("demo-"):
+        raise HTTPException(status_code=403, detail="Authority issuance and admission are synthetic-demo only until verified identity, durable tenant isolation and production security review are complete.")
+
+@app.post("/api/authority/warrants", status_code=201)
+def create_authority_warrant(body: AuthorityWarrantIn, user=Depends(session_user)):
+    require_synthetic_authority_demo(user)
+    try:
+        with db() as con:
+            result = issue_warrant(
+                con, owner_id=user["id"], representative_id=body.representative_id,
+                representative_version=body.representative_version,
+                authorizer_id=user["id"], authority_source="INDIVIDUAL_OWNER",
+                purpose=body.purpose, actions=body.actions, resources=body.resources,
+                limits={"money":body.money_limit,"tokens":body.token_limit,
+                        "retries":body.retry_limit,"agent_count":body.agent_limit,
+                        "duration_seconds":body.duration_limit_seconds},
+                expires_at=body.expires_at,
+            )
+            audit(con,user["id"],"AUTHORITY_WARRANT_ISSUED",result["warrant_id"],
+                  {"warrant_digest":result["warrant_digest"],"representative_id":body.representative_id})
+        return {"status":"ISSUED","authority":result,"note":"Synthetic demonstration only; no external action is enabled."}
+    except AuthorityHold as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+    except AuthorityStoreError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+@app.get("/api/authority/warrants")
+def list_authority_warrants(user=Depends(session_user)):
+    require_synthetic_authority_demo(user)
+    with db() as con:
+        rows=con.execute("""SELECT w.warrant_id,w.representative_id,w.representative_version,
+          w.purpose,w.actions_json,w.resources_json,w.limits_json,w.issued_at,w.expires_at,
+          w.warrant_digest,CASE WHEN r.revocation_id IS NULL THEN 0 ELSE 1 END AS revoked
+          FROM authority_warrants w LEFT JOIN authority_revocations r
+          ON r.owner_id=w.owner_id AND r.warrant_id=w.warrant_id
+          WHERE w.owner_id=? ORDER BY w.issued_at DESC""",(user["id"],)).fetchall()
+    return [{"warrant_id":r["warrant_id"],"representative_id":r["representative_id"],
+             "representative_version":r["representative_version"],"purpose":r["purpose"],
+             "actions":json.loads(r["actions_json"]),"resources":json.loads(r["resources_json"]),
+             "limits":json.loads(r["limits_json"]),"issued_at":r["issued_at"],
+             "expires_at":r["expires_at"],"warrant_digest":r["warrant_digest"],
+             "revoked":bool(r["revoked"])} for r in rows]
+
+@app.post("/api/authority/warrants/{warrant_id}/revoke", status_code=200)
+def revoke_authority_warrant(warrant_id: str, body: AuthorityRevokeIn, user=Depends(session_user)):
+    require_synthetic_authority_demo(user)
+    try:
+        with db() as con:
+            revoke_warrant(con,owner_id=user["id"],warrant_id=warrant_id,
+                           revoked_by=user["id"],reason=body.reason)
+            audit(con,user["id"],"AUTHORITY_WARRANT_REVOKED",warrant_id,{"reason":body.reason})
+        return {"warrant_id":warrant_id,"status":"REVOKED","descendants":"will HOLD at next admission check"}
+    except AuthorityHold as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+
+@app.post("/api/authority/approvals", status_code=201)
+def create_exact_approval(body: ExactApprovalIn, user=Depends(session_user)):
+    require_synthetic_authority_demo(user)
+    try:
+        with db() as con:
+            result=approve_exact_action(con,owner_id=user["id"],approved_by=user["id"],
+                warrant_id=body.warrant_id,action=body.action,resource=body.resource,
+                purpose=body.purpose,output_digest=body.output_digest,task_id=body.task_id,
+                expires_at=body.expires_at)
+            audit(con,user["id"],"EXACT_ACTION_APPROVED",result["approval_id"],
+                  {"warrant_id":body.warrant_id,"request_digest":result["request_digest"],
+                   "output_digest":body.output_digest})
+        return {"status":"APPROVED","approval":result,
+                "note":"Approval is bound to this exact output digest and is single-use."}
+    except AuthorityHold as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+    except AuthorityStoreError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+@app.post("/api/authority/admit", status_code=200)
+def admit_authorized_action(body: AuthorityAdmissionIn, user=Depends(session_user)):
+    require_synthetic_authority_demo(user)
+    try:
+        with db() as con:
+            result=admit_once(con,owner_id=user["id"],approval_id=body.approval_id,
+                idempotency_key=body.idempotency_key,action=body.action,
+                resource=body.resource,purpose=body.purpose,
+                output_digest=body.output_digest,estimated_money=body.estimated_money,
+                estimated_tokens=body.estimated_tokens)
+            audit(con,user["id"],"AUTHORITY_ADMISSION_RESERVED",body.approval_id,
+                  {"idempotency_key":body.idempotency_key,"side_effect_permitted":False})
+        return result
+    except AuthorityHold as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+    except AuthorityStoreError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+@app.get("/api/authority/evidence/verify")
+def verify_authority_evidence(user=Depends(session_user)):
+    require_synthetic_authority_demo(user)
+    with db() as con:
+        valid=verify_authority_events(con,user["id"])
+    return {"valid":valid,"scope":"synthetic-demo-owner","meaning":"Hash-chain integrity only; not proof of truth, identity or lawful authority."}
 
 @app.post("/api/knowledge",status_code=201)
 def submit_knowledge(body:KnowledgeIn,user=Depends(session_user)):
