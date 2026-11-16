@@ -172,6 +172,8 @@ def issue_warrant(con, *, owner_id: str, representative_id: str,
         raise AuthorityStoreError("unsupported authority source")
     if authority_source == "ORGANISATION":
         raise AuthorityHold("organisation authority issuance is not enabled until organisation identity is verified")
+    if authorizer_id != owner_id:
+        raise AuthorityHold("individual-owner warrants must be issued by the authenticated owner")
     if not actions or not resources or not purpose.strip():
         raise AuthorityStoreError("purpose, actions and resources are required")
     rep = con.execute(
@@ -184,6 +186,9 @@ def issue_warrant(con, *, owner_id: str, representative_id: str,
         parent = _active_warrant(con, owner_id, parent_warrant_id, now)
         if parent["purpose"] != purpose:
             raise AuthorityHold("delegation cannot change purpose")
+        if (parent["representative_id"] != representative_id or
+                parent["representative_version"] != representative_version):
+            raise AuthorityHold("delegation must remain bound to the same representative version")
         if not set(actions).issubset(set(json.loads(parent["actions_json"]))):
             raise AuthorityHold("delegated actions exceed parent")
         if not set(resources).issubset(set(json.loads(parent["resources_json"]))):
@@ -191,10 +196,16 @@ def issue_warrant(con, *, owner_id: str, representative_id: str,
         if expires_at > datetime.fromisoformat(parent["expires_at"]):
             raise AuthorityHold("child warrant outlives parent")
         parent_limits = json.loads(parent["limits_json"])
-        for key, child_value in limits.items():
-            parent_value = parent_limits.get(key)
-            if parent_value is None or child_value is None or Decimal(str(child_value)) > Decimal(str(parent_value)):
+        for key, parent_value in parent_limits.items():
+            child_value = limits.get(key)
+            if parent_value is None:
+                if child_value is not None:
+                    raise AuthorityHold(f"delegated {key} allowance cannot be created")
+            elif child_value is None or Decimal(str(child_value)) > Decimal(str(parent_value)):
                 raise AuthorityHold(f"delegated {key} limit exceeds parent or is unbounded")
+        for key, child_value in limits.items():
+            if key not in parent_limits and child_value is not None:
+                raise AuthorityHold(f"delegated {key} allowance is not defined by parent")
     warrant_id = str(uuid4())
     body = {
         "warrant_id": warrant_id, "owner_id": owner_id,
@@ -235,6 +246,18 @@ def _active_warrant(con, owner_id: str, warrant_id: str, now: datetime):
         ).fetchone()
         if not row:
             raise AuthorityHold("warrant or parent authority missing")
+        expected_body = {
+            "warrant_id": row["warrant_id"], "owner_id": row["owner_id"],
+            "representative_id": row["representative_id"],
+            "representative_version": row["representative_version"],
+            "authorizer_id": row["authorizer_id"], "authority_source": row["authority_source"],
+            "purpose": row["purpose"], "actions": json.loads(row["actions_json"]),
+            "resources": json.loads(row["resources_json"]), "limits": json.loads(row["limits_json"]),
+            "parent_warrant_id": row["parent_warrant_id"],
+            "issued_at": row["issued_at"], "expires_at": row["expires_at"],
+        }
+        if sha256(canonical_json(expected_body)) != row["warrant_digest"]:
+            raise AuthorityHold("warrant integrity check failed")
         if leaf is None:
             leaf = row
         if con.execute("SELECT 1 FROM authority_revocations WHERE owner_id=? AND warrant_id=?",
