@@ -231,7 +231,7 @@ class AuthorityWarrantIn(BaseModel):
     purpose: str = Field(min_length=3, max_length=240)
     actions: list[str] = Field(min_length=1, max_length=20)
     resources: list[str] = Field(min_length=1, max_length=20)
-    money_limit: str = Field(pattern=r"^\\d+(?:\\.\\d{1,2})?$")
+    money_limit: str = Field(pattern=r"^\d+(?:\.\d{1,2})?$")
     token_limit: int = Field(ge=0, le=10000000)
     retry_limit: int = Field(ge=0, le=100)
     agent_limit: int = Field(ge=1, le=100)
@@ -257,7 +257,7 @@ class AuthorityAdmissionIn(BaseModel):
     resource: str
     purpose: str
     output_digest: str = Field(pattern=r"^[0-9a-fA-F]{64}$")
-    estimated_money: str = Field(pattern=r"^\\d+(?:\\.\\d{1,2})?$")
+    estimated_money: str = Field(pattern=r"^\d+(?:\.\d{1,2})?$")
     estimated_tokens: int = Field(ge=0, le=10000000)
 
 def require_synthetic_authority_demo(user):
