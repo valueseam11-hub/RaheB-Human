@@ -356,6 +356,8 @@ def admit_authorized_action(body: AuthorityAdmissionIn, user=Depends(session_use
         raise HTTPException(status_code=409, detail=str(exc))
     except AuthorityStoreError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=409, detail="Duplicate reservation or authority state conflict")
 
 @app.get("/api/authority/evidence/verify")
 def verify_authority_evidence(user=Depends(session_user)):
