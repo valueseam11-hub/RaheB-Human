@@ -123,6 +123,22 @@ class DurableAuthorityTests(unittest.TestCase):
         with self.assertRaises(sqlite3.IntegrityError):
             self.con.execute("UPDATE authority_events SET event_type='FORGED' WHERE sequence=1")
 
+
+    def test_warrant_records_are_immutable(self):
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.con.execute("UPDATE authority_warrants SET purpose='other' WHERE warrant_id=?",
+                             (self.warrant["warrant_id"],))
+
+    def test_account_deletion_cascades_demo_authority_records(self):
+        self.make_approval()
+        self.con.commit()
+        self.con.execute("DELETE FROM users WHERE id=?", (self.owner,))
+        self.con.commit()
+        self.assertEqual(self.con.execute(
+            "SELECT COUNT(*) FROM authority_warrants WHERE owner_id=?", (self.owner,)).fetchone()[0], 0)
+        self.assertEqual(self.con.execute(
+            "SELECT COUNT(*) FROM authority_events WHERE owner_id=?", (self.owner,)).fetchone()[0], 0)
+
     def test_organisation_authority_fails_closed_until_identity_is_ready(self):
         with self.assertRaises(AuthorityHold):
             issue_warrant(self.con, owner_id=self.owner, representative_id=self.rep,
