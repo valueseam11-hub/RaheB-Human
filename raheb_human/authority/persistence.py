@@ -75,7 +75,7 @@ def init_authority_schema(con: sqlite3.Connection) -> None:
     CREATE TABLE IF NOT EXISTS authority_approvals (
       approval_id TEXT PRIMARY KEY,
       owner_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      warrant_id TEXT NOT NULL REFERENCES authority_warrants(warrant_id),
+      warrant_id TEXT NOT NULL REFERENCES authority_warrants(warrant_id) ON DELETE CASCADE,
       representative_id TEXT NOT NULL,
       representative_version INTEGER NOT NULL,
       warrant_digest TEXT NOT NULL,
@@ -95,7 +95,7 @@ def init_authority_schema(con: sqlite3.Connection) -> None:
     CREATE TABLE IF NOT EXISTS authority_budget_reservations (
       reservation_id TEXT PRIMARY KEY,
       owner_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      warrant_id TEXT NOT NULL REFERENCES authority_warrants(warrant_id),
+      warrant_id TEXT NOT NULL REFERENCES authority_warrants(warrant_id) ON DELETE CASCADE,
       approval_id TEXT NOT NULL UNIQUE REFERENCES authority_approvals(approval_id) ON DELETE CASCADE,
       idempotency_key TEXT NOT NULL,
       money TEXT NOT NULL,
