@@ -41,6 +41,8 @@ def sha256(value: str) -> str:
 
 def init_authority_schema(con: sqlite3.Connection) -> None:
     con.executescript("""
+    DROP TRIGGER IF EXISTS authority_events_no_delete;
+    DROP TRIGGER IF EXISTS authority_warrants_no_delete;
     CREATE TABLE IF NOT EXISTS authority_warrants (
       warrant_id TEXT PRIMARY KEY,
       owner_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -117,17 +119,9 @@ def init_authority_schema(con: sqlite3.Connection) -> None:
       BEFORE UPDATE ON authority_events BEGIN
       SELECT RAISE(ABORT,'authority events are append-only');
     END;
-    CREATE TRIGGER IF NOT EXISTS authority_events_no_delete
-      BEFORE DELETE ON authority_events BEGIN
-      SELECT RAISE(ABORT,'authority events are append-only');
-    END;
     CREATE TRIGGER IF NOT EXISTS authority_warrants_no_update
       BEFORE UPDATE ON authority_warrants BEGIN
       SELECT RAISE(ABORT,'authority warrants are immutable; issue a new version');
-    END;
-    CREATE TRIGGER IF NOT EXISTS authority_warrants_no_delete
-      BEFORE DELETE ON authority_warrants BEGIN
-      SELECT RAISE(ABORT,'authority warrants are immutable');
     END;
     """)
 
