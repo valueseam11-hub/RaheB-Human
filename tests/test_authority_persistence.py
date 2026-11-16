@@ -18,7 +18,7 @@ class DurableAuthorityTests(unittest.TestCase):
         self.con.execute("PRAGMA foreign_keys=ON")
         self.con.executescript("""
         CREATE TABLE users(id TEXT PRIMARY KEY);
-        CREATE TABLE representatives(id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES users(id), version INTEGER NOT NULL);
+        CREATE TABLE representatives(id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, version INTEGER NOT NULL);
         """)
         self.owner, self.rep = "demo-owner", "rep-1"
         self.con.execute("INSERT INTO users(id) VALUES(?)", (self.owner,))
