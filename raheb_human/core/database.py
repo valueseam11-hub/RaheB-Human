@@ -92,7 +92,7 @@ class Connection:
 
 
 def connect(database, timeout=10, isolation_level="DEFERRED"):
-    database_url = os.environ.get("DATABASE_URL", "").strip() or DATABASE_URL
+    database_url = os.environ.get("DATABASE_URL", DATABASE_URL).strip()
     app_env = os.environ.get("RAHEB_ENV", APP_ENV).strip().lower()
     if database_url:
         import psycopg
