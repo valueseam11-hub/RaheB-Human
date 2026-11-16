@@ -259,6 +259,9 @@ class AuthorityAdmissionIn(BaseModel):
     output_digest: str = Field(pattern=r"^[0-9a-fA-F]{64}$")
     estimated_money: str = Field(pattern=r"^\d+(?:\.\d{1,2})?$")
     estimated_tokens: int = Field(ge=0, le=10000000)
+    retry_number: int = Field(default=0, ge=0, le=100)
+    active_agent_count: int = Field(default=1, ge=1, le=100)
+    elapsed_seconds: int = Field(default=0, ge=0, le=86400)
 
 def require_synthetic_authority_demo(user):
     if not user["id"].startswith("demo-"):
@@ -344,7 +347,8 @@ def admit_authorized_action(body: AuthorityAdmissionIn, user=Depends(session_use
                 idempotency_key=body.idempotency_key,action=body.action,
                 resource=body.resource,purpose=body.purpose,
                 output_digest=body.output_digest,estimated_money=body.estimated_money,
-                estimated_tokens=body.estimated_tokens)
+                estimated_tokens=body.estimated_tokens,retry_number=body.retry_number,
+                active_agent_count=body.active_agent_count,elapsed_seconds=body.elapsed_seconds)
             audit(con,user["id"],"AUTHORITY_ADMISSION_RESERVED",body.approval_id,
                   {"idempotency_key":body.idempotency_key,"side_effect_permitted":False})
         return result
