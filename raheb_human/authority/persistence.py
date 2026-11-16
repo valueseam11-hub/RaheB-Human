@@ -307,7 +307,8 @@ def approve_exact_action(con, *, owner_id: str, approved_by: str, warrant_id: st
 
 def admit_once(con, *, owner_id: str, approval_id: str, idempotency_key: str,
                action: str, resource: str, purpose: str, output_digest: str,
-               estimated_money: str, estimated_tokens: int) -> dict:
+               estimated_money: str, estimated_tokens: int, retry_number: int = 0,
+               active_agent_count: int = 1, elapsed_seconds: int = 0) -> dict:
     # Acquire SQLite's write lock before checking and consuming the approval.
     con.execute("BEGIN IMMEDIATE")
     approval = con.execute(
@@ -347,23 +348,30 @@ def admit_once(con, *, owner_id: str, approval_id: str, idempotency_key: str,
         raise AuthorityStoreError("resource estimates cannot be negative")
     money_limit = limits.get("money")
     token_limit = limits.get("tokens")
+    if limits.get("retries") is None or retry_number < 0 or retry_number > int(limits["retries"]):
+        raise AuthorityHold("retry ceiling missing or exceeded")
+    if limits.get("agent_count") is None or active_agent_count < 1 or active_agent_count > int(limits["agent_count"]):
+        raise AuthorityHold("agent-count ceiling missing or exceeded")
+    if limits.get("duration_seconds") is None or elapsed_seconds < 0 or elapsed_seconds > int(limits["duration_seconds"]):
+        raise AuthorityHold("duration ceiling missing or exceeded")
     if money_limit is None or token_limit is None:
         raise AuthorityHold("money and token ceilings must both be explicit")
     if money > Decimal(str(money_limit)) or tokens > int(token_limit):
         raise AuthorityHold("single-action consequence estimate exceeds warrant ceiling")
-    totals = con.execute("""SELECT COALESCE(SUM(CAST(money AS NUMERIC)),0) AS money,
-      COALESCE(SUM(tokens),0) AS tokens FROM authority_budget_reservations
-      WHERE owner_id=? AND warrant_id=?""", (owner_id, approval["warrant_id"])).fetchone()
-    if Decimal(str(totals["money"])) + money > Decimal(str(money_limit)) or int(totals["tokens"]) + tokens > int(token_limit):
+    prior = con.execute("""SELECT money,tokens FROM authority_budget_reservations
+      WHERE owner_id=? AND warrant_id=?""", (owner_id, approval["warrant_id"])).fetchall()
+    used_money = sum((Decimal(row["money"]) for row in prior), Decimal("0"))
+    used_tokens = sum(int(row["tokens"]) for row in prior)
+    if used_money + money > Decimal(str(money_limit)) or used_tokens + tokens > int(token_limit):
         raise AuthorityHold("cumulative consequence budget exhausted")
     con.execute("""INSERT INTO authority_budget_reservations
       (reservation_id,owner_id,warrant_id,approval_id,idempotency_key,money,tokens,reserved_at)
       VALUES(?,?,?,?,?,?,?,?)""",
       (str(uuid4()), owner_id, approval["warrant_id"], approval_id,
        idempotency_key, str(money), tokens, iso(now)))
-    con.execute("UPDATE authority_approvals SET consumed_at=? WHERE approval_id=? AND consumed_at IS NULL",
-                (iso(now), approval_id))
-    if con.total_changes < 1:
+    consumed = con.execute("UPDATE authority_approvals SET consumed_at=? WHERE approval_id=? AND consumed_at IS NULL",
+                           (iso(now), approval_id))
+    if consumed.rowcount != 1:
         raise AuthorityHold("approval could not be consumed")
     _event(con, owner_id, approval_id, "ADMISSION_RESERVED",
            {"warrant_id": approval["warrant_id"], "idempotency_key": idempotency_key,
