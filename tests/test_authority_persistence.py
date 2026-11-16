@@ -68,7 +68,7 @@ class DurableAuthorityTests(unittest.TestCase):
 
     def test_parent_revocation_holds_child_approval(self):
         child = issue_warrant(self.con, owner_id=self.owner, representative_id=self.rep,
-            representative_version=2, authorizer_id="agent-1", authority_source="INDIVIDUAL_OWNER",
+            representative_version=2, authorizer_id=self.owner, authority_source="INDIVIDUAL_OWNER",
             purpose="prepare:monthly-report", actions=["prepare_report"], resources=["demo:workspace"],
             limits={"money":"5","tokens":1000,"retries":0,"agent_count":1,"duration_seconds":60},
             expires_at=datetime.now(timezone.utc)+timedelta(minutes=30),
